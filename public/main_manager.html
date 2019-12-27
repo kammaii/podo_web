@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>메인</title>
+  </head>
+  <body>
+    <h1>메인</h1>
+    <div class="teacher">
+      <input type="button" value="프로필설정" onclick="clickMenu('profile')">
+      <input type="button" value="녹음요청조회" onclick="clickMenu('req_record')">
+      <input type="button" value="교정요청조회" onclick="clickMenu('req_correction')">
+      <input type="button" value="포인트조회" onclick="clickMenu('point')">
+    </div>
+    <br />
+    <div class="manager">
+      <input type="button" value="요청관리" onclick="clickMenu('mng_request')">
+      <input type="button" value="질문관리" onclick="clickMenu('mng_question')">
+      <input type="button" value="회원관리">
+      <input type="button" value="선생님등록" onclick="clickMenu('mng_teacher_resister')">
+    </div>
+  </body>
+  <script src="getName.js"></script>
+  <script>
+
+    function clickMenu(html) {
+      location.href="/" + html + ".html?name=" + name;
+    }
+
+  </script>
+</html>

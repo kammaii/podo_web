@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>포인트</title>
+  </head>
+  <body>
+    <h1>포인트</h1>
+
+    <div>
+      <h3>보유포인트</h3>
+      <span id="ownPoints">포인트</span>
+    </div>
+
+    <div>
+      <h3>인출포인트</h3>
+      <input id="withdrawPoints" type="text" value="" onchange="withdrawPoints()"> 포인트
+    </div>
+
+    <!-- <div>
+      <h3>포인트환산</h3>
+      <span id="pointExchange">0 원</span>
+    </div>
+
+    <h3>입금계좌</h3>
+    은행 <input id="bankName" type="text" value="">
+    계좌번호 <input id="accountNumber" type="text" value="">
+    <input type="button" value="저장" onclick="saveAccount()"> -->
+
+
+    <form class="gform pure-form pure-form-stacked" method="POST" data-email="example@email.net"
+    action="https://script.google.com/macros/s/AKfycbyWwjlP82lxat2w9K3vd03rFDvfc9xlaLqBKP3u/exec">
+
+      <div class="form-elements">
+        <input id="name" name="name"/>
+        <input id="pointsA" name="ownPoints"/>
+        <input id="pointsB" name="withdrawPoints"/>
+
+        <div>
+          <h3>포인트환산</h3>
+          <input id="exchangePoints" name="exchangePoints" disabled/>
+        </div>
+        <br>
+        <div>
+          <h3>은행</h3>
+          <input id="bank" name="bank"/>
+        </div>
+
+        <div>
+          <h3>계좌번호</h3>
+          <input id="account" name="account"/>
+          <input type="button" value="저장" onclick="saveAccount()">
+        </div>
+        <br>
+
+        <button class="button-success pure-button button-xlarge" onclick="setNewPoints()">
+          <i class="fa fa-paper-plane"></i>&nbsp;인출요청보내기</button>
+      </div>
+
+      <script data-cfasync="false" type="text/javascript"
+      src="https://cdn.rawgit.com/dwyl/html-form-send-email-via-google-script-without-server/master/form-submission-handler.js">
+      </script>
+
+      <!-- Customise the Thankyou Message People See when they submit the form: -->
+      <div class="thankyou_message" style="display:none;">
+        <h2><em>인출요청이 완료되었습니다.</em></h2>
+        <input type="button" value="메인메뉴로가기" onclick="window.history.back()">
+      </div>
+
+    </form>
+
+    <!-- Submit the Form to Google Using "AJAX" -->
+    <script data-cfasync="false" src="form-submission-handler.js"></script>
+  <!-- END -->
+
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getName.js"></script>
+    <script>
+
+      document.getElementById('name').style.display = 'none';
+      document.getElementById('pointsA').style.display = 'none';
+      document.getElementById('pointsB').style.display = 'none';
+
+      var ownPoints;
+      var withdrawPoints;
+      var account;
+      document.getElementById('name').value = name;
+
+      var teachersRef = db.collection("android/podo/teachers").doc(name);
+      teachersRef.get().then(function(doc) {
+        if(doc.exists) {
+          ownPoints = doc.data().points;
+          account = doc.data().account;
+          document.getElementById('ownPoints').innerHTML = addComma(ownPoints) + " 포인트";
+          document.getElementById('pointsA').value = addComma(ownPoints) + " 포인트";
+          document.getElementById('bank').value = account[0];
+          document.getElementById('account').value = account[1];
+        }
+      });
+
+
+      // 인출포인트 입력 시 작동
+      function withdrawPoints() {
+        withdrawPoints = document.getElementById('withdrawPoints').value;
+        if(withdrawPoints > ownPoints) {
+          alert("보유포인트보다 큰 값을 입력하였습니다")
+          document.getElementById('withdrawPoints').value = "";
+        } else {
+          document.getElementById('exchangePoints').value = addComma(withdrawPoints * 100) + "원";
+          document.getElementById('pointsB').value = addComma(withdrawPoints) + " 포인트";
+
+        }
+      }
+
+
+      // 은행계좌 저장
+      function saveAccount() {
+        let newBankName = document.getElementById("bank").value;
+        let newAccountNumber = document.getElementById("account").value;
+        return teachersRef.update({
+          account: {
+            0: newBankName,
+            1: newAccountNumber
+          }
+        })
+        .then(function() {
+          alert("저장되었습니다")
+        });
+      }
+
+
+      // 보유포인트 업데이트
+      function setNewPoints() {
+        console.log("HELLO");
+        let newPoints = ownPoints - withdrawPoints;
+        return teachersRef.update({
+          points: newPoints
+        });
+      }
+
+
+      // 숫자에 콤마 넣는 함수
+      function addComma(num) {
+        var regexp = /\B(?=(\d{3})+(?!\d))/g;
+        return num.toString().replace(regexp, ',');
+      }
+    </script>
+  </body>
+</html>

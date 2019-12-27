@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>선생님등록</title>
+  </head>
+  <body>
+    <h1>선생님등록</h1>
+    <form class="signup" method="post">
+      <label for="id">이름 : </label>
+      <input id="inputName" type="text" size="15" value="" ><br>
+      <label for="pass">비밀번호 : </label>
+      <input id="inputPass" type="password" size="15" value="" ><br>
+      <label for="email">이메일 : </label>
+      <input id="inputEmail" type="email" size="15" value=""><br>
+      <input type="button" value="등록" onclick="resister()">
+    </form>
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+
+    <script>
+
+    function resister() {
+
+      let inputName = document.getElementById("inputName").value;
+      let inputPass = document.getElementById("inputPass").value;
+      let inputEmail = document.getElementById("inputEmail").value;
+      let dateNow = firebase.firestore.FieldValue.serverTimestamp();
+
+      db.collection("android/podo/teachers").doc(inputName).set({
+        password: inputPass,
+        email: inputEmail,
+        image: "",
+        audio: "",
+        status: "preparing",
+        tag: "",
+        countCorrection: 0,
+        countRecord: 0,
+        points: 0,
+        dateResistration: dateNow,
+        dateLogin: dateNow,
+        account: {
+          0: "",
+          1: ""
+        }
+      })
+      .then(function() {
+          alert("선생님등록이 완료되었습니다")
+          console.log("Document successfully written!");
+      })
+      .catch(function(error) {
+          console.error("Error writing document: ", error);
+      });
+    }
+
+    </script>
+  </body>
+</html>

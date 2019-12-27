@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>교정요청</title>
+    <style>
+      .menus, .listClass{
+        display: flex;
+        justify-content: space-around;
+        border-bottom: 1px solid grey;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>교정요청</h1>
+    <input type="button" value="교정요청상세(임시)" onclick="location.href='req_correction_detail.html'">
+
+    <div class="menus">
+      <div class="no">No.</div>
+      <div class="studentEmail">학생이메일</div>
+      <div class="requestDate">요청날짜</div>
+      <div class="completeDate">완료날짜</div>
+      <div class="dueDate">완료기한</div>
+      <div class="status">상태</div>
+      <div class="teacherName">담당</div>
+    </div>
+
+    <div id="list">
+    </div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getName.js"></script>
+
+    <script>
+      var no = 0;
+
+      //var writingRef = db.collection("android/podo/writings").where("isCorrected", ">", 0);
+      var collectionRef = db.collection("android/podo/collections");
+      // writingRef.orderBy("dateRequest", "desc");
+      // collectionRef.orderBy("dateRequest", "desc");
+
+      collectionRef.get().then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+          console.log(doc.data().front);
+          let data = doc.data();
+          let div = document.createElement('div');
+          div.style.display = "flex";
+          div.style.justifyContent = "space-around";
+          div.id = "listId" + no;
+          document.getElementById("list").appendChild(div);
+
+          let requestNo = document.createElement('div');
+          let studentEmail = document.createElement('div');
+          let requestDate = document.createElement('div');
+          let completeDate = document.createElement('div');
+          let dueDate = document.createElement('div');
+          let status = document.createElement('div');
+          let teacherName = document.createElement('div');
+          requestNo.innerHTML = no;
+          studentEmail.innerHTML = data.userEmail;
+          requestDate.innerHTML = data.dateRequest;
+          completeDate.innerHTML = data.dateRecorded;
+          dueDate.innerHTML = "";
+          if(data.isRecorded == 1) {
+            status.innerHTML = "검토중";
+          }else if(data.isRecorded == 2) {
+            status.innerHTML = "녹음됨";
+          }else if(data.isRecorded == 3) {
+            status.innerHTML = "거부됨";
+          }
+          teacherName.innerHTML = data.teacherName;
+
+          let items = document.getElementById("listId" + no);
+          items.appendChild(requestNo);
+          items.appendChild(studentEmail);
+          items.appendChild(requestDate);
+          items.appendChild(completeDate);
+          items.appendChild(dueDate);
+          items.appendChild(status);
+          items.appendChild(teacherName);
+
+          no++;
+        })
+      })
+    </script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>로그인</title>
+  </head>
+  <body>
+    <h3>로그인</h3>
+    <hr>
+    <form class="signin" method="get">
+      <label for="id">이름 : </label>
+      <input id="inputName" type="text" size="15" value="" ><br>
+      <label for="pass">비밀번호 : </label>
+      <input id="inputPass" type="password" size="15" value="" ><br><br>
+      <input type="button" value="로그인" onclick="login()">
+    </form>
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+
+    <script>
+
+      function login() {
+        let inputName = document.getElementById("inputName").value;
+        let inputPass = document.getElementById("inputPass").value;
+
+        var docRef = db.collection("android/podo/teachers").doc(inputName);
+
+        docRef.get().then(function(doc) {
+
+          if (doc.exists) {
+            let getPass = doc.data().password;
+
+            if(inputPass == getPass) {
+              alert("로그인 성공")
+              if(inputName == "danny") {
+                location.href="/main_manager.html?name="+inputName;
+              } else {
+                location.href="/main_teacher.html?name="+inputName;
+              }
+
+            } else {
+              alert("비밀번호 틀림")
+            }
+
+          } else {
+            alert("아이디 틀림")
+          }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });
+      }
+
+    </script>
+  </body>
+</html>

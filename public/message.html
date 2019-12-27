@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>메시지보내기</title>
+  </head>
+  <body>
+    <h1>메시지보내기</h1>
+
+    <h3>아이디</h3>
+    <input type="text" value="">
+    <input type="button" value="검색" onclick="">
+
+    <h3>메시지선택</h3>
+    // 메시지페이지 들어온 경로에 따라 메시지폼 리스트 각각 보이게 하기
+    <div class="message_question">
+      <select name="message">
+          <option value="">메시지폼선택</option>
+          <option value="question_selected">질문채택</option>
+          <option value="question_dropped_overlap">질문미채택(중복)</option>
+          <option value="question_dropped_notrelated">질문미채택(한국어관련x)</option>
+          <option value="question_dropped_slang">질문미채택(비속어사용)</option>
+      </select>
+    </div>
+
+    <div class="message_request">
+      <select name="message">
+          <option value="">메시지폼선택</option>
+          <option value="req_approved">요청승인</option>
+          <option value="req_denied">요청거부</option>
+      </select>
+    </div>
+
+
+    <h3>내용</h3>
+    <textarea name="message" rows="8" cols="80"></textarea>
+    <hr>
+    <input type="button" value="전송" onclick="">
+  </body>
+</html>

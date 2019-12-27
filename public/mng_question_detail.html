@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>질문관리_상세</title>
+  </head>
+  <body>
+    <h1>질문관리_상세</h1>
+    <select name="status">
+        <option value="">상태선택</option>
+        <option value="new">신규</option>
+        <option value="choose">채택</option>
+        <option value="drop_overlap">미채택(중복)</option>
+        <option value="drop_notrelated">미채택(한국어관련x)</option>
+        <option value="drop_slang">미채택(비속어사용)</option>
+    </select>
+    <select name="category">
+        <option value="">카테고리선택</option>
+    </select>
+    <input type="text" value="">
+    <input type="button" value="추가" onclick="">
+
+    <h3>아이디</h3>
+    <input type="button" value="메시지보내기" onclick="window.open('message.html')" target>
+    <h3>질문내용</h3>
+    <textarea name="question" rows="8" cols="80"></textarea>
+    <h3>답변내용</h3>
+    <textarea name="answer" rows="8" cols="80"></textarea>
+
+    <hr>
+    <input type="button" value="등록/수정" onclick="">
+    <input type="button" value="삭제" onclick="">
+  </body>
+</html>

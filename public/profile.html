@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>프로필설정</title>
+  </head>
+  <body>
+    <h1>프로필설정</h1>
+
+    <h3>사진등록</h3>
+    <img id="image" src="" alt="profileImage" width="100px" width="100px"><br>
+    <input id="imgUpload" type="file" accept="image/jpeg" value="프로필사진업로드">
+
+
+    <h3>상태</h3>
+    <input type="radio" id="available" name="status" value="available">available
+    <input type="radio" id="vacation" name="status" value="vacation">vacation
+    <input type="button" value="저장" onclick="saveStatus()">
+
+    <h3>소개</h3>
+    <audio controls>
+      <source src="audio/sample.mp3" type="audio/mp3">
+    </audio>
+    <input type="button" value="녹음하기">
+
+    <h3>태그입력</h3>
+    <input id="inputTag" type="text" value="">
+    <input type="button" value="저장" onclick="saveTag()">
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-storage.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getName.js"></script>
+    <script>
+
+    // DB에서 프로필사진 가져오기
+      var storage = firebase.storage();
+      var imgRef = "teachers/image_" + name + ".jpg"
+      var imgUrl = storage.ref(imgRef).getDownloadURL().then(function(url) {
+        let img = document.getElementById('image');
+        img.src = url;
+      });
+      //document.getElementById('imgUpload').addEventListener('change', readFile, false);
+
+      // DB에서 상태, 태그 가져오기
+      var teachersRef = db.collection("android/podo/teachers").doc(name);
+      teachersRef.get().then(function(doc) {
+        if(doc.exists) {
+          let oldStatus = doc.data().status;
+          let oldTag = doc.data().tag;
+          if(oldStatus == "available") {
+            document.getElementById('available').checked = true;
+          } else if (oldStatus == "vacation") {
+            document.getElementById('vacation').checked = true;
+          }
+          document.getElementById('inputTag').value = oldTag;
+        }
+      });
+
+
+      // 상태 저장하기
+      function saveStatus() {
+        let newStatus = document.getElementsByName('status');
+        for(var i=0; i<newStatus.length; i++) {
+          if(newStatus[i].checked == true) {
+            console.log(newStatus[i].value);
+
+            return teachersRef.update({
+              status: newStatus[i].value
+            })
+            .then(function() {
+              alert("저장되었습니다")
+            });
+          }
+        }
+      }
+
+      // 태그 저장하기
+      function saveTag() {
+        let newTag = document.getElementById("inputTag").value;
+        return teachersRef.update({
+          tag: newTag
+        })
+        .then(function() {
+          alert("저장되었습니다")
+        });
+      }
+
+
+
+    </script>
+  </body>
+</html>
