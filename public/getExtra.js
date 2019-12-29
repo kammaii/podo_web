@@ -1,3 +1,3 @@
-var name = location.href.substr(
+var getExtra = location.href.substr(
   location.href.lastIndexOf('=') + 1
 );

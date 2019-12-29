@@ -7,28 +7,98 @@
   <body>
     <h1>교정요청_상세</h1>
 
-    <select name="status">
-        <option value="new">신규</option>
-        <option value="approve">승인</option>
-        <option value="deny">거부</option>
+    <h3>학생이름: <span id="studentName"></span></h3>
+
+
+    <select id="selector" onchange="selectMessage()">
+        <option value="req_accepted">승인</option>
+        <option value="req_denied">거부</option>
     </select>
-    <input type="button" value="메시지보내기" onclick="window.open('message.html')" target>
 
-
-    <h3>아이디</h3>
-    // 학생 아이디 출력
 
     <h3>학생글</h3>
-    <textarea name="writing" rows="8" cols="80" disabled></textarea>
+    <textarea id="studentWriting" rows="8" cols="80" disabled></textarea>
 
     <h3>교정</h3>
-    <textarea name="correction" rows="8" cols="80">//자동으로 학생글 가져오기</textarea>
+    <textarea id="teacherCorrection" rows="8" cols="80"></textarea>
 
     <h3>피드백/문법설명</h3>
-    <textarea name="feedback" rows="8" cols="80"></textarea>
+    <textarea id="teacherFeedback" rows="8" cols="80"></textarea>
+
+    <h3>학생피드백</h3>
+    <textarea id="studentFeedback" rows="8" cols="80" disabled></textarea>
 
     <hr>
-    <input type="button" value="완료" onclick=""> // 확인창으로 한번 더 확인하기
+    <input type="button" value="완료" onclick="btnCompleted()">
 
+
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
+
+    <script>
+
+      var userEmail;
+      var writingRef = db.collection("android/podo/writings").doc(getExtra);
+      var target = document.getElementById("selector");
+      var correctAnswer;
+
+
+      writingRef.get().then(function(doc) {
+        if(doc.exists) {
+          document.getElementById('studentName').innerHTML = doc.data().userName;
+          document.getElementById('studentWriting').value = doc.data().article;
+          document.getElementById('teacherCorrection').value = doc.data().correction;
+          document.getElementById('teacherFeedback').value = doc.data().teacherFeedback;
+          document.getElementById('studentFeedback').value = doc.data().studentFeedback;
+          userEmail = doc.data().userEmail;
+          if(doc.data().isCorrected == 3) {
+            target.options[1].selected = true;
+          }
+        }
+      })
+
+
+      // 완료버튼 누름
+      function btnCompleted() {
+        var isCompleted = confirm("완료하시겠습니까?");
+
+        if(isCompleted) {
+          var teacherCorrection = document.getElementById('teacherCorrection').value;
+          var teacherFeedback = document.getElementById('teacherFeedback').value;
+          var d = new Date();
+          var nowDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+
+          if(target.options[target.selectedIndex].value == "req_denied") {
+            correctAnswer = 3;
+          } else {
+            correctAnswer = 2;
+          }
+          return writingRef.update({
+            correction: teacherCorrection,
+            teacherFeedback: teacherFeedback,
+            isCorrected: correctAnswer,
+            dateCorrection: nowDate
+          }).then(function() {
+            window.close();
+          })
+        }
+      }
+
+
+      // 메시지 선택
+      function selectMessage() {
+        if(target.options[target.selectedIndex].value == "req_denied")  {
+          var isDenied = confirm("이 요청을 정말로 거부 하시겠습니까?");
+          if(isDenied) {
+            alert("피드백에 거부 이유를 설명해주세요")
+            document.getElementById("teacherFeedback").value = "Your request for correction has been rejected because it contains inappropriate contents";
+          }
+        }
+      }
+
+    </script>
   </body>
 </html>

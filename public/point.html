@@ -77,7 +77,7 @@
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
     <script src="firebaseinit.js"></script>
-    <script src="getName.js"></script>
+    <script src="getExtra.js"></script>
     <script>
 
       document.getElementById('name').style.display = 'none';
@@ -87,9 +87,9 @@
       var ownPoints;
       var withdrawPoints;
       var account;
-      document.getElementById('name').value = name;
+      document.getElementById('name').value = getExtra;
 
-      var teachersRef = db.collection("android/podo/teachers").doc(name);
+      var teachersRef = db.collection("android/podo/teachers").doc(getExtra);
       teachersRef.get().then(function(doc) {
         if(doc.exists) {
           ownPoints = doc.data().points;

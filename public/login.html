@@ -33,19 +33,15 @@
             let getPass = doc.data().password;
 
             if(inputPass == getPass) {
-              alert("로그인 성공")
-              if(inputName == "danny") {
-                location.href="/main_manager.html?name="+inputName;
-              } else {
-                location.href="/main_teacher.html?name="+inputName;
-              }
+              alert("로그인 성공");
+              location.href="/main.html?name="+inputName;
 
             } else {
-              alert("비밀번호 틀림")
+              alert("비밀번호 틀림");
             }
 
           } else {
-            alert("아이디 틀림")
+            alert("아이디 틀림");
           }
         }).catch(function(error) {
             console.log("Error getting document:", error);

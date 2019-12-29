@@ -7,34 +7,32 @@
   <body>
     <h1>메시지보내기</h1>
 
-    <h3>아이디</h3>
-    <input type="text" value="">
-    <input type="button" value="검색" onclick="">
+    <h3>이메일</h3>
+    <input id="userEmail" type="text" value="">
 
     <h3>메시지선택</h3>
-    // 메시지페이지 들어온 경로에 따라 메시지폼 리스트 각각 보이게 하기
-    <div class="message_question">
-      <select name="message">
-          <option value="">메시지폼선택</option>
-          <option value="question_selected">질문채택</option>
-          <option value="question_dropped_overlap">질문미채택(중복)</option>
-          <option value="question_dropped_notrelated">질문미채택(한국어관련x)</option>
-          <option value="question_dropped_slang">질문미채택(비속어사용)</option>
-      </select>
-    </div>
-
-    <div class="message_request">
-      <select name="message">
-          <option value="">메시지폼선택</option>
-          <option value="req_approved">요청승인</option>
-          <option value="req_denied">요청거부</option>
-      </select>
-    </div>
-
+    <select id="selector" onchange="selectMessage()">
+        <option value="">메시지폼선택</option>
+        <option value="req_denied">교정요청거부</option>
+    </select>
 
     <h3>내용</h3>
-    <textarea name="message" rows="8" cols="80"></textarea>
+    <textarea id="message" rows="8" cols="80"></textarea>
     <hr>
     <input type="button" value="전송" onclick="">
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script>
+
+      // 메시지 선택
+      function selectMessage() {
+        var target = document.getElementById("selector");
+        if(target.options[target.selectedIndex].value == "req_denied")  {
+          document.getElementById("message").value = "Your request for correction has been rejected because it contains inappropriate contents";
+        }
+      }
+    </script>
   </body>
 </html>

@@ -31,12 +31,12 @@
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-storage.js"></script>
     <script src="firebaseinit.js"></script>
-    <script src="getName.js"></script>
+    <script src="getExtra.js"></script>
     <script>
 
     // DB에서 프로필사진 가져오기
       var storage = firebase.storage();
-      var imgRef = "teachers/image_" + name + ".jpg"
+      var imgRef = "teachers/image_" + getExtra + ".jpg"
       var imgUrl = storage.ref(imgRef).getDownloadURL().then(function(url) {
         let img = document.getElementById('image');
         img.src = url;
@@ -44,7 +44,7 @@
       //document.getElementById('imgUpload').addEventListener('change', readFile, false);
 
       // DB에서 상태, 태그 가져오기
-      var teachersRef = db.collection("android/podo/teachers").doc(name);
+      var teachersRef = db.collection("android/podo/teachers").doc(getExtra);
       teachersRef.get().then(function(doc) {
         if(doc.exists) {
           let oldStatus = doc.data().status;
