@@ -23,9 +23,9 @@
     <br><br>
     학생이메일 검색: <input id="searchEmail" value=""/> <br>
     상태 검색:
-    <input type="radio" name="status"> 검토중
-    <input type="radio" name="status"> 교정완료
-    <input type="radio" name="status"> 거부됨
+    <input type="radio" name="status"> 신규
+    <input type="radio" name="status"> 완료
+    <input type="radio" name="status"> 거부
     <input type="button" value="검색" onclick="search()">
     <br><br>
     <div class="tg-wrap">
@@ -54,30 +54,33 @@
       var row;
       var no = 0;
 
+      var request;
+      var searchAll;
+
       var reference;
 
       // 검색하기
       function search() {
-        var request = document.getElementsByName('request');
-        var searchAll = document.getElementById('searchAll');
+        request = document.getElementsByName('request');
+        searchAll = document.getElementById('searchAll');
 
         // 교정요청, 녹음요청 선택
         if(request[0].checked) {
           console.log("교정요청");
-          reference = db.collection("android/podo/writings").where("teacherName", "==", getExtra);
+          reference = db.collection("android/podo/teachers/requests/writings").where("teacherId", "==", getExtra);
         } else if(request[1].checked) {
           console.log("녹음요청");
-          reference = db.collection("android/podo/collections").where("teacherName", "==", getExtra);
+          reference = db.collection("android/podo/teachers/requests/collections").where("teacherId", "==", getExtra);
         }
 
         // 전체 선택
         if(searchAll.checked) {
           if(request[0].checked) {
             console.log("교정요청 + 전체체크");
-            reference = db.collection("android/podo/writings");
+            reference = db.collection("android/podo/teachers/requests/writings");
           } else if(request[1].checked) {
             console.log("녹음요청 + 전체체크");
-            reference = db.collection("android/podo/collections");
+            reference = db.collection("android/podo/teachers/requests/collections");
           }
         }
 
@@ -86,10 +89,10 @@
         if(searchEmail != "") {
           if(request[0].checked) {
             console.log("교정요청 + 학생이메일");
-            reference.where("userEmail", "==", searchEmail);
+            reference = reference.where("userEmail", "==", searchEmail);
           } else if(request[1].checked) {
             console.log("녹음요청 + 학생이메일");
-            reference.where("userEmail", "==", searchEmail);
+            reference = reference.where("userEmail", "==", searchEmail);
           }
         }
 
@@ -107,19 +110,13 @@
             }
             if(request[0].checked) {
               console.log("교정요청+"+statusId);
-              reference.where("isCorrected", "==", statusId);
+              reference = reference.where("isCorrected", "==", statusId);
             } else if(request[1].checked) {
               console.log("녹음요청+"+statusId);
-              reference.where("isRecorded", "==", statusId);
+              reference = reference.where("isRecorded", "==", statusId);
             }
           }
         }
-
-        for(let i=0; i<no; i++) {
-          let item = document.getElementById('row' + i);
-          item.innerHTML = "";
-        }
-        no = 0;
         getItems();
       }
 
@@ -131,22 +128,32 @@
       }
 
 
-      // DB에서 아이템 가져오기
+      // 테이블 초기화하고 DB에서 아이템 가져오기
       function getItems() {
+
+        for(let i=0; i<no; i++) {
+          let item = document.getElementById('row' + i);
+          item.innerHTML = "";
+          console.log("row"+i+"을 지웁니다");
+
+        }
+        no = 0;
+
         reference.get().then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {
             let data = doc.data();
             tbody = document.getElementById('tg');
-            row = tbody.insertRow(-1);
+            row = tbody.insertRow();
             row.id = "row" + no;
+            console.log("row"+no+"이 생성되었습니다");
 
             let selectItem = row.insertCell(0)
             let requestNo = row.insertCell(1);
             let guidNo = row.insertCell(2);
-            let article = row.insertCell(3);
+            let contents = row.insertCell(3);
             let studentEmail = row.insertCell(4);
             let requestDate = row.insertCell(5);
-            let completeDate = row.insertCell(6);
+            let answerDate = row.insertCell(6);
             let status = row.insertCell(7);
             let teacherName = row.insertCell(8);
             let guid = data.guid;
@@ -154,15 +161,19 @@
 
             requestNo.innerHTML = no;
             guidNo.innerHTML = guid.substring(0,8)+"...";
-            article.innerHTML = data.article.substring(0,30)+"...";
+            if(request[0].checked) {
+              contents.innerHTML = data.contents.substring(0,30)+"...";
+            } else if(request[1].checked) {
+              contents.innerHTML = data.front.substring(0,30)+"...";
+            }
             studentEmail.innerHTML = data.userEmail;
             requestDate.innerHTML = data.dateRequest;
-            completeDate.innerHTML = data.dateCorrection;
-            if(data.isCorrected == 1) {
+            answerDate.innerHTML = data.dateAnswer;
+            if(data.status == 1) {
               status.innerHTML = "신규";
-            }else if(data.isCorrected == 2) {
+            }else if(data.status == 2) {
               status.innerHTML = "완료";
-            }else if(data.isCorrected == 3) {
+            }else if(data.status == 3) {
               status.innerHTML = "거부";
             }
             teacherName.innerHTML = data.teacherName;

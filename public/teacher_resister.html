@@ -7,10 +7,12 @@
   <body>
     <h1>선생님등록</h1>
     <form class="signup" method="post">
-      <label for="id">이름 : </label>
-      <input id="inputName" type="text" size="15" value="" ><br>
+      <label for="id">아이디 : </label>
+      <input id="inputId" type="text" size="15" value="" ><br>
       <label for="pass">비밀번호 : </label>
       <input id="inputPass" type="password" size="15" value="" ><br>
+      <label for="name">이름 : </label>
+      <input id="inputName" type="text" size="15" value="" ><br>
       <label for="email">이메일 : </label>
       <input id="inputEmail" type="email" size="15" value=""><br>
       <input type="button" value="등록" onclick="resister()">
@@ -24,17 +26,20 @@
 
     function resister() {
 
-      let inputName = document.getElementById("inputName").value;
+      let inputId = document.getElementById("inputId").value;
       let inputPass = document.getElementById("inputPass").value;
+      let inputName = document.getElementById("inputName").value;
       let inputEmail = document.getElementById("inputEmail").value;
       let dateNow = firebase.firestore.FieldValue.serverTimestamp();
 
-      db.collection("android/podo/teachers").doc(inputName).set({
+      db.collection("android/podo/teachers/information/information").doc(inputId).set({
+        id: inputId,
+        name: inputName,
         password: inputPass,
         email: inputEmail,
-        image: "",
-        audio: "",
-        status: "preparing",
+        image: "teachers/image_" + inputId + ".jpg",
+        audio: "teachers/audio_" + inputId + ".mp3",
+        status: 0, //0: 준비중, 1: available, 2: vacation
         tag: "",
         countCorrection: 0,
         countRecord: 0,

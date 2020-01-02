@@ -89,7 +89,7 @@
       var account;
       document.getElementById('name').value = getExtra;
 
-      var teachersRef = db.collection("android/podo/teachers").doc(getExtra);
+      var teachersRef = db.collection("android/podo/teachers/information/information").doc(getExtra);
       teachersRef.get().then(function(doc) {
         if(doc.exists) {
           ownPoints = doc.data().points;

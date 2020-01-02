@@ -16,10 +16,10 @@
         <option value="req_denied">교정요청거부</option>
     </select>
 
-    <h3>내용</h3>
+    <h3>메시지</h3>
     <textarea id="message" rows="8" cols="80"></textarea>
     <hr>
-    <input type="button" value="전송" onclick="">
+    <input type="button" value="전송" onclick="sendMessage()">
 
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
@@ -32,6 +32,29 @@
         if(target.options[target.selectedIndex].value == "req_denied")  {
           document.getElementById("message").value = "Your request for correction has been rejected because it contains inappropriate contents";
         }
+      }
+
+      //메시지 보내기 - db에 메시지 추가
+      function sendMessage() {
+        var email = document.getElementById("userEmail").value;
+        var message = document.getElementById("message").value;
+        var d = new Date();
+        var nowDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+        db.collection("android/podo/users").doc(email).collection("messages").add({
+          message: message,
+          messageDate: nowDate,
+          isNew: true
+          // 보내는 사람 이미지 추가할 것
+        })
+        .then(function() {
+          var isSend = confirm("메시지를 보내시겠습니까?");
+          if(isSend) {
+            alert("메시지를 보냈습니다");
+          }
+        })
+        .catch(function(error) {
+          alert("메시지를 보낼 수 없습니다" + error);
+        });
       }
     </script>
   </body>

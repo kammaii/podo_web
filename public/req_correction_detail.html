@@ -41,20 +41,20 @@
     <script>
 
       var userEmail;
-      var writingRef = db.collection("android/podo/writings").doc(getExtra);
+      var writingRef = db.collection("android/podo/teachers/requests/writings").doc(getExtra);
       var target = document.getElementById("selector");
-      var correctAnswer;
+      var status;
 
 
       writingRef.get().then(function(doc) {
         if(doc.exists) {
           document.getElementById('studentName').innerHTML = doc.data().userName;
-          document.getElementById('studentWriting').value = doc.data().article;
+          document.getElementById('studentWriting').value = doc.data().contents;
           document.getElementById('teacherCorrection').value = doc.data().correction;
           document.getElementById('teacherFeedback').value = doc.data().teacherFeedback;
           document.getElementById('studentFeedback').value = doc.data().studentFeedback;
           userEmail = doc.data().userEmail;
-          if(doc.data().isCorrected == 3) {
+          if(doc.data().status == 3) {
             target.options[1].selected = true;
           }
         }
@@ -64,6 +64,7 @@
       // 완료버튼 누름
       function btnCompleted() {
         var isCompleted = confirm("완료하시겠습니까?");
+        var sendMessage;
 
         if(isCompleted) {
           var teacherCorrection = document.getElementById('teacherCorrection').value;
@@ -72,17 +73,34 @@
           var nowDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
 
           if(target.options[target.selectedIndex].value == "req_denied") {
-            correctAnswer = 3;
+            status = 3;
+            sendMessage = "Your request is denied. See the reason on feedback."
           } else {
-            correctAnswer = 2;
+            status = 2;
+            sendMessage = "Your request is corrected. Check your writing."
           }
+
+          // 교정, 피드백 업데이트
           return writingRef.update({
             correction: teacherCorrection,
             teacherFeedback: teacherFeedback,
-            isCorrected: correctAnswer,
+            status: status,
             dateCorrection: nowDate
           }).then(function() {
-            window.close();
+
+            // 완료 메시지 보내기
+            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
+              isNew: true,
+              message: sendMessage,
+              messageDate: nowDate,
+              senderImage: 0
+            })
+            .then(function() {
+              window.close();
+            })
+            .catch(function(error) {
+              console.log(error);
+            })
           })
         }
       }

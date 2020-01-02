@@ -8,8 +8,8 @@
     <h3>로그인</h3>
     <hr>
     <form class="signin" method="get">
-      <label for="id">이름 : </label>
-      <input id="inputName" type="text" size="15" value="" ><br>
+      <label for="id">아이디 : </label>
+      <input id="inputId" type="text" size="15" value="" ><br>
       <label for="pass">비밀번호 : </label>
       <input id="inputPass" type="password" size="15" value="" ><br><br>
       <input type="button" value="로그인" onclick="login()">
@@ -22,10 +22,10 @@
     <script>
 
       function login() {
-        let inputName = document.getElementById("inputName").value;
+        let inputId = document.getElementById("inputId").value;
         let inputPass = document.getElementById("inputPass").value;
 
-        var docRef = db.collection("android/podo/teachers").doc(inputName);
+        var docRef = db.collection("android/podo/teachers/information/information").doc(inputId);
 
         docRef.get().then(function(doc) {
 
@@ -34,7 +34,7 @@
 
             if(inputPass == getPass) {
               alert("로그인 성공");
-              location.href="/main.html?name="+inputName;
+              location.href="/main.html?id="+inputId;
 
             } else {
               alert("비밀번호 틀림");
