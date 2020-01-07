@@ -7,22 +7,119 @@
   <body>
     <h1>녹음요청_상세</h1>
 
-    <select name="status">
-        <option value="new">신규</option>
-        <option value="approve">승인</option>
-        <option value="deny">거부</option>
+    <h3>학생이메일: <span id="studentEmail"></span></h3>
+
+
+    <select id="selector" onchange="selectMessage()">
+        <option value="req_accepted">승인</option>
+        <option value="req_denied">거부</option>
     </select>
-    <input type="button" value="메시지보내기" onclick="window.open('message.html')" target>
 
-    <h3>아이디</h3>
-    // 학생 아이디 출력
+    <h3>Front</h3>
+    <textarea id="collectionFront" rows="3" cols="50" disabled></textarea>
 
-    <h3>목록</h3>
-    // DB에서 녹음요청리스트 출력
+    <h3>Back</h3>
+    <textarea id="collectionBack" rows="3" cols="50"></textarea>
+
+    <h3>녹음</h3>
+    <section class="main-controls">
+      <canvas class="visualizer" height="30px"></canvas>
+      <div id="buttons">
+        <button class="record">Record</button>
+        <button class="stop">Stop</button>
+      </div>
+    </section>
+
+    <section class="sound-clips">
+    </section>
+
 
     <hr>
-    <input type="button" value="완료" onclick="" target>
+    <input type="button" value="완료" onclick="btnCompleted()">
 
 
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
+    <script src="record.js"></script>
+
+    <script>
+
+      var userEmail;
+      var collectionRef = db.collection("android/podo/teachers/requests/collections").doc(getExtra);
+      var selector = document.getElementById("selector");
+      var status;
+
+
+      collectionRef.get().then(function(doc) {
+        if(doc.exists) {
+          document.getElementById('studentEmail').innerHTML = doc.data().userEmail;
+          document.getElementById('collectionFront').value = doc.data().front;
+          document.getElementById('collectionBack').value = doc.data().back;
+          if(doc.data().status == 3) {
+            selector.options[1].selected = true;
+          }
+        }
+      })
+
+
+      // 완료버튼 누름
+      function btnCompleted() {
+        var isCompleted = confirm("완료하시겠습니까?");
+        var sendMessage;
+
+        if(isCompleted) {
+          var teacherCorrection = document.getElementById('teacherCorrection').value;
+          var teacherFeedback = document.getElementById('teacherFeedback').value;
+          var d = new Date();
+          var nowDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+
+          if(selector.options[selector.selectedIndex].value == "req_denied") {
+            status = 3;
+            sendMessage = "Your request is denied. See the reason on feedback."
+          } else {
+            status = 2;
+            sendMessage = "Your request is corrected. Check your writing."
+          }
+
+          // 교정, 피드백 업데이트
+          return writingRef.update({
+            correction: teacherCorrection,
+            teacherFeedback: teacherFeedback,
+            status: status,
+            dateCorrection: nowDate
+          }).then(function() {
+
+            // 완료 메시지 보내기
+            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
+              isNew: true,
+              message: sendMessage,
+              messageDate: nowDate,
+              senderImage: 0
+            })
+            .then(function() {
+              window.close();
+            })
+            .catch(function(error) {
+              console.log(error);
+            })
+          })
+        }
+      }
+
+
+      // 메시지 선택
+      function selectMessage() {
+        if(selector.options[selector.selectedIndex].value == "req_denied")  {
+          var isDenied = confirm("이 요청을 정말로 거부 하시겠습니까?");
+          if(isDenied) {
+            alert("피드백에 거부 이유를 설명해주세요")
+            document.getElementById("teacherFeedback").value = "Your request for correction has been rejected because it contains inappropriate contents";
+          }
+        }
+      }
+
+    </script>
   </body>
 </html>

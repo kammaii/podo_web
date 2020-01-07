@@ -110,10 +110,11 @@
             }
             if(request[0].checked) {
               console.log("교정요청+"+statusId);
-              reference = reference.where("isCorrected", "==", statusId);
+              reference = reference.where("status", "==", statusId);
+              console.log(reference);
             } else if(request[1].checked) {
               console.log("녹음요청+"+statusId);
-              reference = reference.where("isRecorded", "==", statusId);
+              reference = reference.where("status", "==", statusId);
             }
           }
         }
@@ -121,23 +122,28 @@
       }
 
 
-      // 상세정보페이지에 학생이름이랑 guid 넘기기
+      // 상세정보페이지에 guid 넘기기
       function nextPage(guid) {
         var newWindow = window.open("about:blank");
-        newWindow.location.href="/req_correction_detail.html?guid=" + guid;
+        if(request[0].checked) {
+          newWindow.location.href="/req_correction_detail.html?guid=" + guid;
+        } else if(request[1].checked) {
+          newWindow.location.href="/req_record_detail.html?guid=" + guid;
+        }
       }
 
 
       // 테이블 초기화하고 DB에서 아이템 가져오기
       function getItems() {
 
-        for(let i=0; i<no; i++) {
-          let item = document.getElementById('row' + i);
-          item.innerHTML = "";
-          console.log("row"+i+"을 지웁니다");
-
+        if(no > 0) {
+          for(let i=0; i<no; i++) {
+            let item = document.getElementById('row' + i);
+            item.remove();
+            console.log("row"+i+"을 지웁니다");
+          }
+          no = 0;
         }
-        no = 0;
 
         reference.get().then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {

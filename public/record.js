@@ -6,6 +6,16 @@ const soundClips = document.querySelector('.sound-clips');
 const canvas = document.querySelector('.visualizer');
 const mainSection = document.querySelector('.main-controls');
 
+function uploadToFirestore(blob) {
+  var storageRef = storage.ref();
+  console.log("attempting upload");
+  var ref = storageRef.child('records/'getExtra + '.ogg');
+  ref.put(blob).then(function(snapshot) {
+    console.log('Uploaded a blob or file!');
+  });
+}
+
+
 // disable stop button while not recording
 
 stop.disabled = true;
@@ -59,12 +69,12 @@ if (navigator.mediaDevices.getUserMedia) {
       const clipLabel = document.createElement('p');
       const audio = document.createElement('audio');
       const deleteButton = document.createElement('button');
-
+      console.log("line 72");
       clipContainer.classList.add('clip');
       audio.setAttribute('controls', '');
       deleteButton.textContent = 'Delete';
       deleteButton.className = 'delete';
-
+      console.log("line 77");
       if(clipName === null) {
         clipLabel.textContent = 'My unnamed clip';
       } else {
@@ -75,9 +85,9 @@ if (navigator.mediaDevices.getUserMedia) {
       clipContainer.appendChild(clipLabel);
       clipContainer.appendChild(deleteButton);
       soundClips.appendChild(clipContainer);
-
       audio.controls = true;
       const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+      uploadToFirestore(blob, clipName);
       chunks = [];
       const audioURL = window.URL.createObjectURL(blob);
       audio.src = audioURL;
@@ -113,6 +123,7 @@ if (navigator.mediaDevices.getUserMedia) {
 } else {
    console.log('getUserMedia not supported on your browser!');
 }
+
 
 function visualize(stream) {
   if(!audioCtx) {
