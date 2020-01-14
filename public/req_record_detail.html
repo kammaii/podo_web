@@ -3,6 +3,17 @@
   <head>
     <meta charset="utf-8">
     <title>녹음요청_상세</title>
+    <style>
+      .menus, .listClass{
+        display: flex;
+        justify-content: space-around;
+        border-bottom: 1px solid grey;
+      }
+      #tg  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+      #tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+      #tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
+      #tg {text-align:left;vertical-align:middle}
+    </style>
   </head>
   <body>
     <h1>녹음요청_상세</h1>
@@ -15,11 +26,14 @@
         <option value="req_denied">거부</option>
     </select>
 
-    <h3>Front</h3>
-    <textarea id="collectionFront" rows="3" cols="50" disabled></textarea>
-
-    <h3>Back</h3>
-    <textarea id="collectionBack" rows="3" cols="50"></textarea>
+    <div class="tg-wrap">
+      <table id="tg">
+        <tr>
+          <th>FRONT</th>
+          <th>BACK</th>
+        </tr>
+      </table>
+    </div>
 
     <h3>녹음</h3>
     <section class="main-controls">
@@ -38,11 +52,11 @@
     <input type="button" value="완료" onclick="btnCompleted()">
 
 
-    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-firestore.js"></script> -->
     <script src="firebaseinit.js"></script>
     <script src="getExtra.js"></script>
-    <script src="record.js"></script>
+    <!-- <script src="record.js"></script> -->
 
     <script>
 
@@ -50,13 +64,88 @@
       var collectionRef = db.collection("android/podo/teachers/requests/collections").doc(getExtra);
       var selector = document.getElementById("selector");
       var status;
+      var no = 0;
+      var mediaRecorder = null;
+      var guid = null;
 
+      function startRecord(mediaRecorder, thisGuid) {
+        guid = thisGuid;
+        mediaRecorder.start();
+        console.log(mediaRecorder.state);
+        console.log("recorder started");
+        // stop.disabled = false;
+        // record.disabled = true;
+      }
+
+      function stopRecord(mediaRecorder) {
+          mediaRecorder.stop();
+          console.log(mediaRecorder.state);
+          console.log("recorder stopped");
+      }
+
+      function uploadToFirestore(blob) {
+        var storageRef = storage.ref();
+        console.log("attempting upload" + getExtra);
+        var ref = storageRef.child('records/' + getExtra + '.ogg');
+        ref.put(blob).then(function(snapshot) {
+          console.log('Uploaded a blob or file!');
+        });
+      }
+
+      if (navigator.mediaDevices.getUserMedia) {
+        console.log('getUserMedia supported.');
+
+        const constraints = { audio: true };
+        let chunks = [];
+
+        let onSuccess = function(stream) {
+          mediaRecorder = new MediaRecorder(stream);
+
+          // visualize(stream);
+
+          var blobs = [];
+          mediaRecorder.onstop = function(e) {
+            console.log("data available after MediaRecorder.stop() called.");
+
+            // const clipName = prompt('Enter a name for your sound clip?','My unnamed clip');
+            console.log(guid);
+            var clipName = guid + ".ogg";
+
+            const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+            blobs.push(blob);
+            uploadToFirestore(blob, clipName);
+            chunks = [];
+            const audioURL = window.URL.createObjectURL(blob);
+            console.log("recorder stopped");
+          }
+
+      function onSuccess(stream) {
+        const mediaRecorder = new MediaRecorder(stream);
+      }
 
       collectionRef.get().then(function(doc) {
         if(doc.exists) {
           document.getElementById('studentEmail').innerHTML = doc.data().userEmail;
-          document.getElementById('collectionFront').value = doc.data().front;
-          document.getElementById('collectionBack').value = doc.data().back;
+
+          for(var i=0; i<doc.data().front.length; i++) {
+            tbody = document.getElementById('tg');
+            row = tbody.insertRow();
+
+            let front = row.insertCell(0)
+            let back = row.insertCell(1);
+            let record = row.insertCell(2);
+            let stop = row.insertCell(3);
+
+            record.innerHTML = "<input type='button' value='녹음' class='record'>";
+            record.onclick = startRecord(mediaRecorder, doc.data().guid[i]);
+            stop.innerHTML = "<input type='button' value='정지' class='stop'>";
+            stop.onclick = stopRecord(mediaRecorder);
+
+            row.id = "row" + no;
+            front.innerHTML = doc.data().front[i];
+            back.innerHTML = doc.data().back[i];
+          }
+
           if(doc.data().status == 3) {
             selector.options[1].selected = true;
           }
@@ -70,31 +159,12 @@
         var sendMessage;
 
         if(isCompleted) {
-          var teacherCorrection = document.getElementById('teacherCorrection').value;
-          var teacherFeedback = document.getElementById('teacherFeedback').value;
-          var d = new Date();
-          var nowDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-
-          if(selector.options[selector.selectedIndex].value == "req_denied") {
-            status = 3;
-            sendMessage = "Your request is denied. See the reason on feedback."
-          } else {
-            status = 2;
-            sendMessage = "Your request is corrected. Check your writing."
-          }
-
-          // 교정, 피드백 업데이트
-          return writingRef.update({
-            correction: teacherCorrection,
-            teacherFeedback: teacherFeedback,
-            status: status,
-            dateCorrection: nowDate
-          }).then(function() {
+            //
 
             // 완료 메시지 보내기
             db.collection("android/podo/users").doc(userEmail).collection("messages").add({
               isNew: true,
-              message: sendMessage,
+              message: "Recording is finished",
               messageDate: nowDate,
               senderImage: 0
             })
@@ -104,7 +174,6 @@
             .catch(function(error) {
               console.log(error);
             })
-          })
         }
       }
 

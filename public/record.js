@@ -8,8 +8,8 @@ const mainSection = document.querySelector('.main-controls');
 
 function uploadToFirestore(blob) {
   var storageRef = storage.ref();
-  console.log("attempting upload");
-  var ref = storageRef.child('records/'getExtra + '.ogg');
+  console.log("attempting upload" + getExtra);
+  var ref = storageRef.child('records/' + getExtra + '.ogg');
   ref.put(blob).then(function(snapshot) {
     console.log('Uploaded a blob or file!');
   });
@@ -60,6 +60,7 @@ if (navigator.mediaDevices.getUserMedia) {
       record.disabled = false;
     }
 
+    var blobs = [];
     mediaRecorder.onstop = function(e) {
       console.log("data available after MediaRecorder.stop() called.");
 
@@ -87,12 +88,14 @@ if (navigator.mediaDevices.getUserMedia) {
       soundClips.appendChild(clipContainer);
       audio.controls = true;
       const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-      uploadToFirestore(blob, clipName);
+      blobs.push(blob);
+      // uploadToFirestore(blob, clipName);
       chunks = [];
       const audioURL = window.URL.createObjectURL(blob);
       audio.src = audioURL;
       console.log("recorder stopped");
 
+      // todo: need to remove blob from blobs
       deleteButton.onclick = function(e) {
         evtTgt = e.target;
         evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);

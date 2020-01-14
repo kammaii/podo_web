@@ -163,14 +163,16 @@
             let status = row.insertCell(7);
             let teacherName = row.insertCell(8);
             let guid = data.guid;
-            selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + guid + "')\">";
 
             requestNo.innerHTML = no;
-            guidNo.innerHTML = guid.substring(0,8)+"...";
             if(request[0].checked) {
+              selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + guid + "')\">";
+              guidNo.innerHTML = guid.substring(0,8)+"...";
               contents.innerHTML = data.contents.substring(0,30)+"...";
             } else if(request[1].checked) {
-              contents.innerHTML = data.front.substring(0,30)+"...";
+              selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + doc.id + "')\">";
+              guidNo.innerHTML = doc.id.substring(0,8)+"...";
+              contents.innerHTML = data.front[0].substring(0,30)+"...";
             }
             studentEmail.innerHTML = data.userEmail;
             requestDate.innerHTML = data.dateRequest;
