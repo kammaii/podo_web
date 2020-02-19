@@ -44,10 +44,11 @@
       </table>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
     <script src="firebaseinit.js"></script>
     <script src="getExtra.js"></script>
+    <script src="moment.js"></script>
 
     <script>
       var tbody;
@@ -175,8 +176,12 @@
               contents.innerHTML = data.front[0].substring(0,30)+"...";
             }
             studentEmail.innerHTML = data.userEmail;
-            requestDate.innerHTML = data.dateRequest;
-            answerDate.innerHTML = data.dateAnswer;
+            var dateRequest = new Date(data.dateRequest * 1000);
+            requestDate.innerHTML = moment(dateRequest).format('YYYY-MM-DD HH:mm:ss');
+            if(data.dateAnswer != null) {
+              var dateAnswer = new Date(data.dateAnswer * 1000);
+              answerDate.innerHTML = moment(dateAnswer).format('YYYY-MM-DD HH:mm:ss');
+            }
             if(data.status == 1) {
               status.innerHTML = "신규";
             }else if(data.status == 2) {

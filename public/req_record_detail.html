@@ -35,18 +35,8 @@
       </table>
     </div>
 
-    <h3>녹음</h3>
-    <section class="main-controls">
-      <canvas class="visualizer" height="30px"></canvas>
-      <div id="buttons">
-        <button class="record">Record</button>
-        <button class="stop">Stop</button>
-      </div>
+    <section id="sound-clips">
     </section>
-
-    <section class="sound-clips">
-    </section>
-
 
     <hr>
     <input type="button" value="완료" onclick="btnCompleted()">
@@ -67,29 +57,40 @@
       var no = 0;
       var mediaRecorder = null;
       var guid = null;
+      var blobs = {};
 
-      function startRecord(mediaRecorder, thisGuid) {
-        guid = thisGuid;
-        mediaRecorder.start();
-        console.log(mediaRecorder.state);
-        console.log("recorder started");
-        // stop.disabled = false;
-        // record.disabled = true;
+
+      var soundClips = document.getElementById("sound-clips");
+
+      function startRecord(thisGuid) {
+        return function(event) {
+          guid = thisGuid;
+          mediaRecorder.start();
+          console.log(mediaRecorder.state);
+          console.log("recorder started");
+          // stop.disabled = false;
+          // record.disabled = true;
+        }
       }
 
-      function stopRecord(mediaRecorder) {
+      function stopRecord(event) {
+          console.log(event);
           mediaRecorder.stop();
           console.log(mediaRecorder.state);
           console.log("recorder stopped");
       }
 
-      function uploadToFirestore(blob) {
+      function uploadToFirestore(blob, guid) {
         var storageRef = storage.ref();
-        console.log("attempting upload" + getExtra);
-        var ref = storageRef.child('records/' + getExtra + '.ogg');
+        console.log("attempting upload" + guid);
+        var ref = storageRef.child('records/' + guid + '.ogg');
         ref.put(blob).then(function(snapshot) {
           console.log('Uploaded a blob or file!');
         });
+      }
+
+      let onError = function(err) {
+        console.log('The following error occured: ' + err);
       }
 
       if (navigator.mediaDevices.getUserMedia) {
@@ -100,10 +101,9 @@
 
         let onSuccess = function(stream) {
           mediaRecorder = new MediaRecorder(stream);
-
+          console.log("MediaRecorder is ready");
           // visualize(stream);
 
-          var blobs = [];
           mediaRecorder.onstop = function(e) {
             console.log("data available after MediaRecorder.stop() called.");
 
@@ -112,45 +112,33 @@
             var clipName = guid + ".ogg";
 
             const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-            blobs.push(blob);
-            uploadToFirestore(blob, clipName);
+            blobs[guid] = blob;
+            //uploadToFirestore(blob, clipName);
             chunks = [];
             const audioURL = window.URL.createObjectURL(blob);
             console.log("recorder stopped");
+
+            console.log("audioURL"+audioURL);
+
+            let row = document.getElementById(guid);
+            const audio = document.createElement('audio');
+            audio.setAttribute('controls', '');
+            audio.controls = true;
+            audio.src = audioURL;
+            row.deleteCell(4);
+            let audioCell = row.insertCell(4);
+            audioCell.appendChild(audio);
+
           }
 
-      function onSuccess(stream) {
-        const mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = function(e) {
+            chunks.push(e.data);
+          }
+
+        }
+        navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
       }
 
-      collectionRef.get().then(function(doc) {
-        if(doc.exists) {
-          document.getElementById('studentEmail').innerHTML = doc.data().userEmail;
-
-          for(var i=0; i<doc.data().front.length; i++) {
-            tbody = document.getElementById('tg');
-            row = tbody.insertRow();
-
-            let front = row.insertCell(0)
-            let back = row.insertCell(1);
-            let record = row.insertCell(2);
-            let stop = row.insertCell(3);
-
-            record.innerHTML = "<input type='button' value='녹음' class='record'>";
-            record.onclick = startRecord(mediaRecorder, doc.data().guid[i]);
-            stop.innerHTML = "<input type='button' value='정지' class='stop'>";
-            stop.onclick = stopRecord(mediaRecorder);
-
-            row.id = "row" + no;
-            front.innerHTML = doc.data().front[i];
-            back.innerHTML = doc.data().back[i];
-          }
-
-          if(doc.data().status == 3) {
-            selector.options[1].selected = true;
-          }
-        }
-      })
 
 
       // 완료버튼 누름
@@ -159,21 +147,30 @@
         var sendMessage;
 
         if(isCompleted) {
-            //
+            // 파일 업로드
+            let blobKeys = Object.keys(blobs);
+            console.log(blobs);
+            for(var i=0; i<blobKeys.length; i++) {
+              var nextKey = blobKeys[i];
+              var nextBlob = blobs[nextKey];
+              console.log("KEY"+blobKeys[i]);
+              uploadToFirestore(nextBlob, nextKey);
+            }
 
-            // 완료 메시지 보내기
-            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
-              isNew: true,
-              message: "Recording is finished",
-              messageDate: nowDate,
-              senderImage: 0
-            })
-            .then(function() {
-              window.close();
-            })
-            .catch(function(error) {
-              console.log(error);
-            })
+
+            // // 완료 메시지 보내기
+            // db.collection("android/podo/users").doc(userEmail).collection("messages").add({
+            //   isNew: true,
+            //   message: "Recording is finished",
+            //   messageDate: nowDate,
+            //   senderImage: 0
+            // })
+            // .then(function() {
+            //   window.close();
+            // })
+            // .catch(function(error) {
+            //   console.log(error);
+            // })
         }
       }
 
@@ -188,6 +185,63 @@
           }
         }
       }
+      collectionRef.get().then(function(doc) {
+        if(doc.exists) {
+          document.getElementById('studentEmail').innerHTML = doc.data().userEmail;
+
+          for(var i=0; i<doc.data().front.length; i++) {
+            tbody = document.getElementById('tg');
+            row = tbody.insertRow();
+            row.id = doc.data().guid[i];
+            console.log("GUID"+row.id);
+
+            let front = row.insertCell(0)
+            let back = row.insertCell(1);
+            let record = row.insertCell(2);
+            let stop = row.insertCell(3);
+            let audio = row.insertCell(4);
+
+            record.innerHTML = "<input type='button' value='녹음' class='record'>";
+            record.onclick = startRecord(doc.data().guid[i]);
+            stop.innerHTML = "<input type='button' value='정지' class='stop'>";
+            stop.onclick = stopRecord;
+
+            front.innerHTML = doc.data().front[i];
+            back.innerHTML = doc.data().back[i];
+
+            var storageRef = storage.ref();
+            storageRef.child('records/' + doc.data().guid[i] + '.ogg').getDownloadURL().then(function(url) {
+              console.log("URL" + url);
+              // `url` is the download URL for 'images/stars.jpg'
+
+              // This can be downloaded directly:
+              var xhr = new XMLHttpRequest();
+              xhr.responseType = 'blob';
+              xhr.onload = function(event) {
+                var blob = xhr.response;
+                const audioURL = window.URL.createObjectURL(blob);
+                const audioControl = document.createElement('audio');
+                audioControl.setAttribute('controls', '');
+                audioControl.controls = true;
+                audioControl.src = audioURL;
+                // row.deleteCell(4);
+                // let audioCell = row.insertCell(4);
+                audio.appendChild(audioControl);
+                console.log("AUDIO"+audioControl);
+              };
+              xhr.open('GET', url);
+              xhr.send();
+
+            }).catch(function(error) {
+              // Handle any errors
+            });
+          }
+
+          if(doc.data().status == 3) {
+            selector.options[1].selected = true;
+          }
+        }
+      })
 
     </script>
   </body>

@@ -33,8 +33,7 @@
 
 
 
-    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
     <script src="firebaseinit.js"></script>
     <script src="getExtra.js"></script>
 
@@ -70,36 +69,50 @@
           var teacherCorrection = document.getElementById('teacherCorrection').value;
           var teacherFeedback = document.getElementById('teacherFeedback').value;
           var d = new Date();
-          var nowDate = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+          var nowDate = Math.floor(Date.now() / 1000);
 
           if(target.options[target.selectedIndex].value == "req_denied") {
             status = 3;
-            sendMessage = "Your request is denied. See the reason on feedback."
+            sendMessage = "Your correction request is denied. See the reason on feedback."
           } else {
             status = 2;
-            sendMessage = "Your request is corrected. Check your writing."
+            sendMessage = "Your correction request is reviewed. Check your writing."
           }
+
+          var numberStatus = parseInt(status);
+
+          console.log(typeof(numberStatus));
 
           // 교정, 피드백 업데이트
           return writingRef.update({
             correction: teacherCorrection,
             teacherFeedback: teacherFeedback,
-            status: status,
-            dateCorrection: nowDate
+            status: numberStatus,
+            dateAnswer: nowDate
           }).then(function() {
 
-            // 완료 메시지 보내기
-            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
-              isNew: true,
-              message: sendMessage,
-              messageDate: nowDate,
-              senderImage: 0
-            })
-            .then(function() {
-              window.close();
-            })
-            .catch(function(error) {
-              console.log(error);
+            // user_requests 에 업데이트하기
+            var userRequestsRef = db.collection("android/podo/users").doc(userEmail).collection("requests").doc(getExtra);
+
+            return userRequestsRef.update({
+              answerDate: nowDate,
+              status: numberStatus
+            }).then(function() {
+              console.log("user_requests에 업데이트 했습니다");
+
+              // 완료 메시지 보내기
+              db.collection("android/podo/users").doc(userEmail).collection("messages").add({
+                isNew: true,
+                message: sendMessage,
+                messageDate: nowDate,
+                senderImage: 0
+              })
+              .then(function() {
+                window.close();
+              })
+              .catch(function(error) {
+                console.log(error);
+              })
             })
           })
         }
