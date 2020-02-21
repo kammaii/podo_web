@@ -81,8 +81,6 @@
 
           var numberStatus = parseInt(status);
 
-          console.log(typeof(numberStatus));
-
           // 교정, 피드백 업데이트
           return writingRef.update({
             correction: teacherCorrection,
@@ -90,29 +88,18 @@
             status: numberStatus,
             dateAnswer: nowDate
           }).then(function() {
-
-            // user_requests 에 업데이트하기
-            var userRequestsRef = db.collection("android/podo/users").doc(userEmail).collection("requests").doc(getExtra);
-
-            return userRequestsRef.update({
-              answerDate: nowDate,
-              status: numberStatus
-            }).then(function() {
-              console.log("user_requests에 업데이트 했습니다");
-
-              // 완료 메시지 보내기
-              db.collection("android/podo/users").doc(userEmail).collection("messages").add({
-                isNew: true,
-                message: sendMessage,
-                messageDate: nowDate,
-                senderImage: 0
-              })
-              .then(function() {
-                window.close();
-              })
-              .catch(function(error) {
-                console.log(error);
-              })
+            // 완료 메시지 보내기
+            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
+              isNew: true,
+              message: sendMessage,
+              messageDate: nowDate,
+              senderImage: 0
+            })
+            .then(function() {
+              window.close();
+            })
+            .catch(function(error) {
+              console.log(error);
             })
           })
         }
