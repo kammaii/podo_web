@@ -11,4 +11,28 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-var storage = firebase.storage();
+//var storage = firebase.storage();
+
+// Initialize the FirebaseUI Widget using Firebase.
+var ui = new firebaseui.auth.AuthUI(firebase.auth());
+
+// The start method will wait until the DOM is loaded.
+
+var uiConfig = {
+  callbacks: {
+    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+
+      let inputId = 'danny';
+      alert("로그인 성공");
+      location.href="/main.html?id="+inputId;
+      return true;
+    },
+  },
+  // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+  signInOptions: [
+    // Leave the lines as is for the providers you want to offer your users.
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+  ],
+};
+
+ui.start('#firebaseui-auth-container', uiConfig);

@@ -7,20 +7,20 @@
   <body>
     <h3>로그인</h3>
     <hr>
-    <form class="signin" method="get">
-      <label for="id">아이디 : </label>
-      <input id="inputId" type="text" size="15" value="" ><br>
-      <label for="pass">비밀번호 : </label>
-      <input id="inputPass" type="password" size="15" value="" ><br><br>
-      <input type="button" value="로그인" onclick="login()">
-    </form>
+    <div id="firebaseui-auth-container">
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
     <script src="firebaseinit.js"></script>
 
     <script>
 
+
+    /*
       function login() {
         let inputId = document.getElementById("inputId").value;
         let inputPass = document.getElementById("inputPass").value;
@@ -47,6 +47,7 @@
             console.log("Error getting document:", error);
         });
       }
+      */
 
     </script>
   </body>
