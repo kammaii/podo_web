@@ -8,7 +8,7 @@
     <h1>교정요청_상세</h1>
 
     <h3>학생이름: <span id="studentName"></span></h3>
-
+    <h3>교정요청횟수: <span id="requestCount"></span></h3>
 
     <select id="selector" onchange="selectMessage()">
         <option value="req_accepted">승인</option>
@@ -53,11 +53,24 @@
           document.getElementById('teacherFeedback').value = doc.data().teacherFeedback;
           document.getElementById('studentFeedback').value = doc.data().studentFeedback;
           userEmail = doc.data().userEmail;
+          getRequestCount();
           if(doc.data().status == 3) {
             target.options[1].selected = true;
           }
         }
       })
+
+      function getRequestCount() {
+        let requestCount = 0;
+        db.collection("android/podo/teachers/requests/writings").where("userEmail", "==", userEmail)
+        .get()
+        .then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            requestCount++;
+            document.getElementById('requestCount').innerHTML = requestCount;
+          });
+        });
+      }
 
 
       // 완료버튼 누름

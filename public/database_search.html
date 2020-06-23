@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>DB조회</title>
+  </head>
+  <body>
+    <h1>DB조회</h1>
+    학생이메일 검색: <input id="inputEmail" value=""/>
+    <input type="button" value="검색" onclick="clickSearchUserDB()">
+    <input type="button" value="내DB검색" onclick="clickSearchMyDB()">
+    </br></br>
+
+    <h3>attention</h3>
+    <input id="daysOfTheWeek" type="text" style='width:95%'>
+
+    <h3>points</h3>
+    <input id="points" type="text" style='width:95%'>
+    <input type="button" value="보너스포인트주기" onclick="giveBonusPoint()">
+
+    <h3>lesson complete</h3>
+    <input id="lessonComplete" type="text" style='width:95%'>
+
+    <h3>reading complete</h3>
+    <input id="readingComplete" type="text" style='width:95%'>
+
+    <h3>special lesson unlock</h3>
+    <input id="specialUnlock" type="text" style='width:95%'>
+
+    <h3>reading unlock</h3>
+    <input id="readingUnlock" type="text" style='width:95%'>
+    </br></br>
+
+    <input type="button" value="전체저장" onclick="save()">
+
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
+    <script src="moment.js"></script>
+
+    <script>
+      let referenceMyDB;
+      let userEmail;
+      let attendance;
+      let points;
+      let lessonComplete;
+      let readingComplete;
+      let specialUnlock;
+      let readingUnlock;
+
+      function giveBonusPoint() {
+        let bonus = prompt('보너스 포인트를 입력하세요');
+        if(userEmail != null) {
+          let pointRef = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+          return db.runTransaction(function(transaction) {
+            return transaction.get(pointRef).then(function(doc) {
+              if(doc.exists) {
+                let newPoint = doc.data().points + parseInt(bonus);
+                transaction.update(pointRef, {points : newPoint});
+                document.getElementById('points').value = newPoint;
+              }
+            });
+          }).then(function() {
+            console.log("보너스 포인트를 보냈습니다.");
+          });
+        }
+      }
+
+      function save() {
+        attendance = document.getElementById('daysOfTheWeek').value;
+        points = document.getElementById('points').value;
+        lessonComplete = document.getElementById('lessonComplete').value;
+        readingComplete = document.getElementById('readingComplete').value;
+        specialUnlock = document.getElementById('specialUnlock').value;
+        readingUnlock = document.getElementById('readingUnlock').value;
+
+        let attendanceArray = stringToArray(attendance);
+        let lessonCompleteArray = stringToArray(lessonComplete);
+        let readingCompleteArray = stringToArray(readingComplete);
+        let specialUnlockArray = stringToArray(specialUnlock);
+        let readingUnlockArray = stringToArray(readingUnlock);
+
+        db.collection("android/podo/users/"+userEmail+"/information").doc("information").set({
+          attendance : attendanceArray,
+          points : parseInt(points),
+          lessonComplete : lessonCompleteArray,
+          readingComplete : readingCompleteArray,
+          specialUnlock : specialUnlockArray,
+          readingUnlock : readingUnlockArray
+        }).then(function() {
+          console.log("DB 업데이트 성공");
+        })
+      }
+
+      function stringToArray(string) {
+        let array = string.split(',');
+
+        if(string == attendance) {
+          for(i=0; i<array.length; i++) {
+            if(array[i] == "true") {
+              array[i] = true;
+            } else {
+              array[i] = false;
+            }
+          }
+        }
+        return array;
+      }
+
+      function searchDB() {
+        referenceMyDB = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+        referenceMyDB.get().then(function(doc) {
+          if(doc.exists) {
+            attendance = doc.data().attendance.toString();
+            points = doc.data().points;
+            lessonComplete = doc.data().lessonComplete.toString();
+            readingComplete = doc.data().readingComplete.toString();
+            specialUnlock = doc.data().specialUnlock.toString();
+            readingUnlock = doc.data().readingUnlock.toString();
+            document.getElementById('daysOfTheWeek').value = attendance;
+            document.getElementById('points').value = points;
+            document.getElementById('lessonComplete').value = lessonComplete;
+            document.getElementById('readingComplete').value = readingComplete;
+            document.getElementById('specialUnlock').value = specialUnlock;
+            document.getElementById('readingUnlock').value = readingUnlock;
+          } else {
+            alert("해당 이메일이 없습니다.");
+          }
+        });
+      }
+
+      function clickSearchUserDB() {
+        userEmail = document.getElementById('inputEmail').value;
+        searchDB();
+      }
+
+      function clickSearchMyDB() {
+        userEmail = 'gabmanpark@gmail.com';
+        searchDB();
+      }
+
+/*
+        request = document.getElementsByName('request');
+        searchAll = document.getElementById('searchAll');
+
+        // 교정요청, 녹음요청 선택
+        if(request[0].checked) {
+          console.log("교정요청");
+          reference = db.collection("android/podo/teachers/requests/writings").where("teacherId", "==", getExtra);
+        } else if(request[1].checked) {
+          console.log("녹음요청");
+          reference = db.collection("android/podo/teachers/requests/collections").where("teacherId", "==", getExtra);
+        }
+
+        // 전체 선택
+        if(searchAll.checked) {
+          if(request[0].checked) {
+            console.log("교정요청 + 전체체크");
+            reference = db.collection("android/podo/teachers/requests/writings");
+          } else if(request[1].checked) {
+            console.log("녹음요청 + 전체체크");
+            reference = db.collection("android/podo/teachers/requests/collections");
+          }
+        }
+
+        // 학생이메일 검색
+        var searchEmail = document.getElementById("searchEmail").value;
+        if(searchEmail != "") {
+          if(request[0].checked) {
+            console.log("교정요청 + 학생이메일");
+            reference = reference.where("userEmail", "==", searchEmail);
+          } else if(request[1].checked) {
+            console.log("녹음요청 + 학생이메일");
+            reference = reference.where("userEmail", "==", searchEmail);
+          }
+        }
+
+        // 상태 검색
+        var status = document.getElementsByName('status');
+        var statusId;
+        for(var i=0; i<3; i++) {
+          if(status[i].checked) {
+            if(i == 0) {
+              statusId = 1;
+            } else if(i == 1) {
+              statusId = 2;
+            } else if(i ==2) {
+              statusId = 3;
+            }
+            if(request[0].checked) {
+              console.log("교정요청+"+statusId);
+              reference = reference.where("status", "==", statusId);
+              console.log(reference);
+            } else if(request[1].checked) {
+              console.log("녹음요청+"+statusId);
+              reference = reference.where("status", "==", statusId);
+            }
+          }
+        }
+        getItems();
+      }
+
+*/
+
+      // 상세정보페이지에 guid 넘기기
+      function nextPage(guid) {
+        var newWindow = window.open("about:blank");
+        if(request[0].checked) {
+          newWindow.location.href="/req_correction_detail.html?guid=" + guid;
+        } else if(request[1].checked) {
+          newWindow.location.href="/req_record_detail.html?guid=" + guid;
+        }
+      }
+
+
+      // 테이블 초기화하고 DB에서 아이템 가져오기
+      function getItems() {
+
+        if(no > 0) {
+          for(let i=0; i<no; i++) {
+            let item = document.getElementById('row' + i);
+            item.remove();
+            console.log("row"+i+"을 지웁니다");
+          }
+          no = 0;
+        }
+
+        reference.get().then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            let data = doc.data();
+            tbody = document.getElementById('tg');
+            row = tbody.insertRow();
+            row.id = "row" + no;
+            console.log("row"+no+"이 생성되었습니다");
+
+            let selectItem = row.insertCell(0)
+            let requestNo = row.insertCell(1);
+            let guidNo = row.insertCell(2);
+            let contents = row.insertCell(3);
+            let studentEmail = row.insertCell(4);
+            let requestDate = row.insertCell(5);
+            let answerDate = row.insertCell(6);
+            let status = row.insertCell(7);
+            let teacherName = row.insertCell(8);
+            let guid = data.guid;
+
+            requestNo.innerHTML = no;
+            if(request[0].checked) {
+              selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + guid + "')\">";
+              guidNo.innerHTML = guid.substring(0,8)+"...";
+              contents.innerHTML = data.contents.substring(0,30)+"...";
+            } else if(request[1].checked) {
+              selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + doc.id + "')\">";
+              guidNo.innerHTML = doc.id.substring(0,8)+"...";
+              contents.innerHTML = data.front[0].substring(0,30)+"...";
+            }
+            studentEmail.innerHTML = data.userEmail;
+            var dateRequest = new Date(data.dateRequest * 1000);
+            requestDate.innerHTML = moment(dateRequest).format('YYYY-MM-DD HH:mm:ss');
+            if(data.dateAnswer != null) {
+              var dateAnswer = new Date(data.dateAnswer * 1000);
+              answerDate.innerHTML = moment(dateAnswer).format('YYYY-MM-DD HH:mm:ss');
+            }
+            if(data.status == 1) {
+              status.innerHTML = "신규";
+            }else if(data.status == 2) {
+              status.innerHTML = "완료";
+            }else if(data.status == 3) {
+              status.innerHTML = "거부";
+            }
+            teacherName.innerHTML = data.teacherName;
+            no++;
+          })
+        })
+      }
+    </script>
+  </body>
+</html>
