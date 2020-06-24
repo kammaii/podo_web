@@ -25,7 +25,7 @@
     <input id="readingComplete" type="text" style='width:95%'>
 
     <h3>special lesson unlock</h3>
-    <input id="specialUnlock" type="text" style='width:95%'>
+    <input id="specialLessonUnlock" type="text" style='width:95%'>
 
     <h3>reading unlock</h3>
     <input id="readingUnlock" type="text" style='width:95%'>
@@ -48,7 +48,7 @@
       let points;
       let lessonComplete;
       let readingComplete;
-      let specialUnlock;
+      let specialLessonUnlock;
       let readingUnlock;
 
       function giveBonusPoint() {
@@ -74,13 +74,13 @@
         points = document.getElementById('points').value;
         lessonComplete = document.getElementById('lessonComplete').value;
         readingComplete = document.getElementById('readingComplete').value;
-        specialUnlock = document.getElementById('specialUnlock').value;
+        specialLessonUnlock = document.getElementById('specialLessonUnlock').value;
         readingUnlock = document.getElementById('readingUnlock').value;
 
         let attendanceArray = stringToArray(attendance);
         let lessonCompleteArray = stringToArray(lessonComplete);
         let readingCompleteArray = stringToArray(readingComplete);
-        let specialUnlockArray = stringToArray(specialUnlock);
+        let specialLessonUnlockArray = stringToArray(specialLessonUnlock);
         let readingUnlockArray = stringToArray(readingUnlock);
 
         db.collection("android/podo/users/"+userEmail+"/information").doc("information").set({
@@ -88,7 +88,7 @@
           points : parseInt(points),
           lessonComplete : lessonCompleteArray,
           readingComplete : readingCompleteArray,
-          specialUnlock : specialUnlockArray,
+          specialLessonUnlock : specialLessonUnlockArray,
           readingUnlock : readingUnlockArray
         }).then(function() {
           console.log("DB 업데이트 성공");
@@ -118,13 +118,13 @@
             points = doc.data().points;
             lessonComplete = doc.data().lessonComplete.toString();
             readingComplete = doc.data().readingComplete.toString();
-            specialUnlock = doc.data().specialUnlock.toString();
+            specialLessonUnlock = doc.data().specialLessonUnlock.toString();
             readingUnlock = doc.data().readingUnlock.toString();
             document.getElementById('daysOfTheWeek').value = attendance;
             document.getElementById('points').value = points;
             document.getElementById('lessonComplete').value = lessonComplete;
             document.getElementById('readingComplete').value = readingComplete;
-            document.getElementById('specialUnlock').value = specialUnlock;
+            document.getElementById('specialLessonUnlock').value = specialLessonUnlock;
             document.getElementById('readingUnlock').value = readingUnlock;
           } else {
             alert("해당 이메일이 없습니다.");

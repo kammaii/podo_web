@@ -85,7 +85,7 @@
           var nowDate = Math.floor(Date.now() / 1000);
 
           if(target.options[target.selectedIndex].value == "req_denied") {
-            status = 3;
+            status = 99;
             sendMessage = "Your correction request is denied. See the reason on feedback."
           } else {
             status = 2;
