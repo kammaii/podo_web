@@ -5,6 +5,14 @@
     <title>선생님등록</title>
   </head>
   <body>
+    <h1>메뉴</h1>
+    <input type="button" value="프로필설정" onclick="nevigation('profile')">
+    <input type="button" value="요청조회" onclick="nevigation('request')">
+    <input type="button" value="포인트조회" onclick="nevigation('point')">
+    <input type="button" value="선생님등록" onclick="nevigation('teacher_resister')">
+    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+    <input type="button" value="DB검색하기" onclick="nevigation('database_search')">
+
     <h1>선생님등록</h1>
     <form class="signup" method="post">
       <label for="id">아이디 : </label>
@@ -22,8 +30,13 @@
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
     <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
 
     <script>
+
+    function nevigation(html) {
+      location.href="/" + html + ".html?id=" + getExtra;
+    }
 
     function resister() {
 

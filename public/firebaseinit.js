@@ -22,12 +22,22 @@ var uiConfig = {
   callbacks: {
     signInSuccessWithAuthResult: function(authResult, redirectUrl) {
 
-      let inputId = 'danny';
-      alert("로그인 성공");
-      location.href="/main.html?id="+inputId;
+      firebase.auth().onAuthStateChanged(function(user) {
+        let inputId;
+
+        switch (user.email.toString()) {
+          case 'akorean.app@gmail.com' :
+            inputId = 'danny';
+            break;
+        }
+
+        location.href="/request.html?id="+inputId;
+      });
+
       return true;
-    },
+    }
   },
+  // signInSuccessUrl: 'main.html',
   // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
   signInOptions: [
     // Leave the lines as is for the providers you want to offer your users.

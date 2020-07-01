@@ -5,6 +5,13 @@
     <title>프로필설정</title>
   </head>
   <body>
+    <h1>메뉴</h1>
+    <input type="button" value="프로필설정" onclick="nevigation('profile')">
+    <input type="button" value="교정조회" onclick="nevigation('request')">
+    <input type="button" value="DB검색" onclick="nevigation('database_search')">
+    <input type="button" value="코멘트검색" onclick="nevigation('comment')">
+    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+
     <h1>프로필설정</h1>
 
     <h3>상태</h3>
@@ -41,6 +48,10 @@
           document.getElementById('inputTag').value = oldTag;
         }
       });
+
+      function nevigation(html) {
+        location.href="/" + html + ".html?id=" + getExtra;
+      }
 
 
       // 상태 저장하기

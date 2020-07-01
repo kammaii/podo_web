@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>코멘트_상세</title>
+  </head>
+  <body>
+    <h1>코멘트_상세</h1>
+
+    <h3>학생이름: <span id="studentName"></span></h3>
+    <h3>코멘트횟수: <span id="commentCount"></span></h3>
+
+    <h3>코멘트</h3>
+    <textarea id="comment" rows="8" cols="80" disabled></textarea>
+
+    <h3>답변</h3>
+    <textarea id="reply" rows="8" cols="80"></textarea>
+    <input type="button" value="답변보내기" onclick="btnReply()">
+
+
+    <hr>
+    <input type="button" value="읽음" onclick="btnCompleted()">
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
+
+    <script>
+
+      var userEmail;
+      var ref = db.collection("android/podo/reports").doc(getExtra);
+      var status;
+      var userToken;
+
+      ref.get().then(function(doc) {
+        if(doc.exists) {
+          document.getElementById('studentName').innerHTML = doc.data().userName;
+          document.getElementById('comment').value = doc.data().comments;
+          userEmail = doc.data().userEmail;
+          userToken = doc.data().userToken;
+          getcommentCount();
+        }
+      })
+
+      function getcommentCount() {
+        let commentCount = 0;
+        db.collection("android/podo/reports").where("userEmail", "==", userEmail)
+        .get()
+        .then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            commentCount++;
+            document.getElementById('commentCount').innerHTML = commentCount;
+          });
+        });
+      }
+
+      // 답변버튼 누름
+      function btnReply() {
+        var reply = document.getElementById('reply').value;
+        var d = new Date();
+        var nowDate = Math.floor(Date.now() / 1000);
+
+        if(reply != "") {
+          return ref.update({
+            status: 2,
+          })
+          .then(function() {
+            // 완료 메시지 보내기
+            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
+              isNew: true,
+              message: reply,
+              messageDate: nowDate,
+              senderImage: 0
+            })
+            .then(function() {
+              window.close();
+            })
+          })
+        }
+      }
+
+      // 완료버튼 누름
+      function btnCompleted() {
+        var isCompleted = confirm("읽음으로 표시하겠습니까?");
+        var sendMessage;
+
+        if(isCompleted) {
+          // 교정, 피드백 업데이트
+          return ref.update({
+            status: 1,
+          })
+          .then(function() {
+            window.close();
+          })
+        }
+      }
+    </script>
+  </body>
+</html>

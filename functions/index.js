@@ -1,7 +1,15 @@
 const functions = require('firebase-functions');
 const nodemailer = require("nodemailer");
 const admin = require('firebase-admin');
-admin.initializeApp();
+// var serviceAccount = require("C://akoreanKeyStore_podo/podo-705c6-firebase-adminsdk-6ks88-c8eaabba97.json");
+
+// function deploy 전에 실행할 것
+// export GOOGLE_APPLICATION_CREDENTIALS="C://akoreanKeyStore_podo/podo-705c6-firebase-adminsdk-6ks88-c8eaabba97.json"
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+  databaseURL: "https://podo-705c6.firebaseio.com"
+});
 
 let messaging = admin.messaging();
 
@@ -22,6 +30,33 @@ function createDB() {
 }
 
 
+function sendMessage(token, payload) {
+  return messaging.sendToDevice(token, payload)
+    .then(function(response){
+      console.log('Notification sent successfully:',response);
+      return response;
+    })
+    .catch(function(error){
+      console.log('Notification sent failed:',error);
+    });
+}
+
+
+function onCommentReply(change, context) {
+  let status = change.after.data().status;
+  if(status === 2) {
+    const payload = {data: {},
+      notification: {
+        title: 'Your feedback has been answered',
+        body: 'check your message'
+    }};
+    sendMessage(change.after.data().userToken, payload);
+  }
+
+  return true;
+}
+
+
 function onWritingChange(change, context) {
   //let data = change.after.data();
   //let status = data.status;
@@ -37,9 +72,19 @@ function onWritingChange(change, context) {
   let correction = change.after.data().correction;
   let teacherFeedback = change.after.data().teacherFeedback;
   let studentFeedback = change.after.data().studentFeedback;
-  if(status == 3) {
+  if(status === 3) {
     sendEmail(contents, correction, teacherFeedback, studentFeedback);
   }
+
+  if(status === 2) {
+    const payload = {data: {},
+      notification: {
+        title: 'Your writing has been corrected',
+        body: 'check your writing'
+    }};
+    sendMessage(change.after.data().userToken, payload);
+  }
+
   return true;
 }
 
@@ -55,16 +100,19 @@ exports.createDB = functions.https.onRequest((request, response) => {
 });
 
 
+exports.onCommentReply = functions
+  .firestore.document('android/podo/reports/{reportsId}')
+  .onWrite(onCommentReply);
+
+
 exports.onWritingChange = functions
   .firestore.document('android/podo/teachers/requests/writings/{writingId}')
   .onWrite(onWritingChange);
 
 
-let sendMessage = function() {
-  console.log("Message sent");
-}
-
-let sendEmail = function(status, contents, correction, teacherFeedback, studentFeedback) {
+let sendEmail = function(contents, correction, teacherFeedback, studentFeedback) {
+  console.log("커렉션" + correction);
+  console.log("학생피드백" + studentFeedback);
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: "gmail",

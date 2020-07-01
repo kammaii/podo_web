@@ -5,6 +5,13 @@
     <title>메시지보내기</title>
   </head>
   <body>
+    <h1>메뉴</h1>
+    <input type="button" value="프로필설정" onclick="nevigation('profile')">
+    <input type="button" value="교정조회" onclick="nevigation('request')">
+    <input type="button" value="DB검색" onclick="nevigation('database_search')">
+    <input type="button" value="코멘트검색" onclick="nevigation('comment')">
+    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+
     <h1>메시지보내기</h1>
 
     <h3>이메일</h3>
@@ -25,6 +32,7 @@
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
     <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
     <script>
 
       // 메시지 선택
@@ -33,6 +41,10 @@
         if(target.options[target.selectedIndex].value == "req_denied")  {
           document.getElementById("message").value = "Your request for correction has been rejected because it contains inappropriate contents";
         }
+      }
+
+      function nevigation(html) {
+        location.href="/" + html + ".html?id=" + getExtra;
       }
 
       //메시지 보내기 - db에 메시지 추가

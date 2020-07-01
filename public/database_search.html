@@ -5,6 +5,13 @@
     <title>DB조회</title>
   </head>
   <body>
+    <h1>메뉴</h1>
+    <input type="button" value="프로필설정" onclick="nevigation('profile')">
+    <input type="button" value="교정조회" onclick="nevigation('request')">
+    <input type="button" value="DB검색" onclick="nevigation('database_search')">
+    <input type="button" value="코멘트검색" onclick="nevigation('comment')">
+    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+
     <h1>DB조회</h1>
     학생이메일 검색: <input id="inputEmail" value=""/>
     <input type="button" value="검색" onclick="clickSearchUserDB()">
@@ -50,6 +57,10 @@
       let readingComplete;
       let specialLessonUnlock;
       let readingUnlock;
+
+      function nevigation(html) {
+        location.href="/" + html + ".html?id=" + getExtra;
+      }
 
       function giveBonusPoint() {
         let bonus = prompt('보너스 포인트를 입력하세요');
