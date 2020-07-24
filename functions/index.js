@@ -5,26 +5,44 @@ const admin = require('firebase-admin');
 
 // function deploy 전에 실행할 것
 // export GOOGLE_APPLICATION_CREDENTIALS="C://akoreanKeyStore_podo/podo-705c6-firebase-adminsdk-6ks88-c8eaabba97.json"
+// functions랑 호스팅 에뮬레이터 실행
+// firebase emulators:start --only functions,hosting
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
-  databaseURL: "https://podo-705c6.firebaseio.com"
+  //databaseURL: "https://podo-705c6.firebaseio.com"
+  databaseURL: "http://localhost:4000/firestore"
 });
 
 let messaging = admin.messaging();
 
 
 function createDB() {
+  console.log("DB 시작!");
   let db = admin.firestore();
 
   let podoDoc = db.collection('android').doc('podo');
   podoDoc.set({id: 'podo'});
-
   let requestsDoc = podoDoc.collection('teachers').doc('requests');
   requestsDoc.set({id: 'requests'});
-
-  let writingDoc = requestsDoc.collection('writings').doc('writing');
-  writingDoc.set({id: 'writing'});
+  let writingDoc = requestsDoc.collection('writings').doc('0000-0000-0000');
+  writingDoc.set({
+    contents: '안녕하세요',
+    correction: '교정',
+    dateAnswer: '',
+    dateRequest: '',
+    guid: 'c8a9acb5-bfb1-4536-a31e-a30392c8dfcb',
+    letters: '',
+    status: 1,
+    studentFeedback: '',
+    teacherFeedback: '잘했어요',
+    teacherId: 'danny',
+    teacherName: 'Danny Park',
+    userEmail: 'gabmanpark@gmail.com',
+    userName: 'danny',
+    userToken: 'eYLTFADIJSs:APA91bE2EqO4fdVUQGoz8ysTq9epL8SSMeKPmIiyjMRRrKGYVRg4AXInIx1wA_6sSIT33xst7gM7tvL4k_XS968WBjfeKLlIXZKZQxH3BpNNuC0TsmmMlG5lAAPzkX2UetxwKvneJnxQ',
+    writingDate: '1592262099'
+  });
 
   return 'success'
 }
@@ -45,7 +63,9 @@ function sendMessage(token, payload) {
 function onCommentReply(change, context) {
   let status = change.after.data().status;
   if(status === 2) {
-    const payload = {data: {},
+    const payload = {
+      data: {
+      },
       notification: {
         title: 'Your feedback has been answered',
         body: 'check your message'
@@ -67,31 +87,53 @@ function onWritingChange(change, context) {
   console.log(change.before.data());
   console.log('AFTER:');
   console.log(change.after.data());
+  let studentEmail = change.after.data().userEmail;
   let status = change.after.data().status;
   let contents = change.after.data().contents;
   let correction = change.after.data().correction;
+  let guid = change.after.data().guid;
   let teacherFeedback = change.after.data().teacherFeedback;
   let studentFeedback = change.after.data().studentFeedback;
-  if(status === 3) {
-    sendEmail(contents, correction, teacherFeedback, studentFeedback);
-  }
 
-  if(status === 2) {
-    const payload = {data: {},
+  // 교정 완료하거나 재요청 하면 클라우드 메시지 보냄
+  if(status === 2 || status === 99) {
+    let title;
+    let body;
+    let statusString;
+
+    if(status === 2) {
+      title = "Your writing has been corrected";
+      body = "check your writing";
+      statusString = "2";
+    } else {
+      title = "Your writing has been returned";
+      body = "Please write more clearly and send it again.\n* Your point has been returned to you.";
+      statusString = "99";
+    }
+
+    const payload = {
+      data: {
+        status: statusString,
+        guid: guid,
+        contents: contents,
+        correction: correction,
+        teacherFeedback: teacherFeedback
+      },
       notification: {
-        title: 'Your writing has been corrected',
-        body: 'check your writing'
-    }};
+        tag: "writing",
+        title: title,
+        body: body
+      }
+    };
     sendMessage(change.after.data().userToken, payload);
+
+  // 학생이 피드백 보내면 나한테 메일 보냄
+  } else if(status === 3) {
+    sendEmail(studentEmail, contents, correction, teacherFeedback, studentFeedback);
   }
 
   return true;
 }
-
-
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Hello from Firebase!");
-});
 
 
 exports.createDB = functions.https.onRequest((request, response) => {
@@ -110,7 +152,7 @@ exports.onWritingChange = functions
   .onWrite(onWritingChange);
 
 
-let sendEmail = function(contents, correction, teacherFeedback, studentFeedback) {
+let sendEmail = function(studentEmail, contents, correction, teacherFeedback, studentFeedback) {
   console.log("커렉션" + correction);
   console.log("학생피드백" + studentFeedback);
   // create reusable transporter object using the default SMTP transport
@@ -125,7 +167,9 @@ let sendEmail = function(contents, correction, teacherFeedback, studentFeedback)
   // send mail with defined transport object
   let mailSubject = "학생이 피드백을 보냈습니다.";
   let mailContents =
-  "<p><b>내용</b><br>"
+  "<p><b>학생이메일</b><br>"
+  + studentEmail + "</p>"
+  + "<p><b>내용</b><br>"
   + contents + "</p>"
   + "<p><b>교정</b><br>"
   + correction + "</p>"

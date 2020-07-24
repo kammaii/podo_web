@@ -10,19 +10,17 @@
     <h3>학생이름: <span id="studentName"></span></h3>
     <h3>교정요청횟수: <span id="requestCount"></span></h3>
 
-    <select id="selector" onchange="selectMessage()">
-        <option value="req_accepted">승인</option>
-        <option value="req_denied">거부</option>
-    </select>
-
+    <input type="radio" name="responseType" checked="checked"> 승인
+    <input type="radio" name="responseType"> 재작성요청
 
     <h3>학생글</h3>
     <textarea id="studentWriting" rows="8" cols="80" disabled></textarea>
 
     <h3>교정</h3>
     <textarea id="teacherCorrection" rows="8" cols="80"></textarea>
+    <input type="button" value="체크" onclick="btnChecked()">
 
-    <h3>피드백/문법설명</h3>
+    <h3>피드백/문법설명 (재작성요청시 : 이해할 수 없는 부분 붙여넣기)</h3>
     <textarea id="teacherFeedback" rows="8" cols="80"></textarea>
 
     <h3>학생피드백</h3>
@@ -41,8 +39,6 @@
 
       var userEmail;
       var writingRef = db.collection("android/podo/teachers/requests/writings").doc(getExtra);
-      var target = document.getElementById("selector");
-      var status;
 
 
       writingRef.get().then(function(doc) {
@@ -54,9 +50,6 @@
           document.getElementById('studentFeedback').value = doc.data().studentFeedback;
           userEmail = doc.data().userEmail;
           getRequestCount();
-          if(doc.data().status == 3) {
-            target.options[1].selected = true;
-          }
         }
       })
 
@@ -77,6 +70,9 @@
       function btnCompleted() {
         var isCompleted = confirm("완료하시겠습니까?");
         var sendMessage;
+        var status;
+        var responseType = document.getElementsByName('responseType');
+
 
         if(isCompleted) {
           var teacherCorrection = document.getElementById('teacherCorrection').value;
@@ -84,15 +80,18 @@
           var d = new Date();
           var nowDate = Math.floor(Date.now() / 1000);
 
-          if(target.options[target.selectedIndex].value == "req_denied") {
-            status = 99;
-            sendMessage = "Your correction request is denied. See the reason on feedback."
-          } else {
-            status = 2;
-            sendMessage = "Your writing has been corrected. Check your writing."
+          for(var i=0; i<2; i++) {
+            if(responseType[i].checked) {
+              if(i == 0) {
+                status = 2;
+              } else if(i == 1) {
+                status = 99;
+              }
+            }
           }
 
           var numberStatus = parseInt(status);
+
 
           // 교정, 피드백 업데이트
           return writingRef.update({
@@ -101,34 +100,16 @@
             status: numberStatus,
             dateAnswer: nowDate
           }).then(function() {
-            // 완료 메시지 보내기
-            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
-              isNew: true,
-              message: sendMessage,
-              messageDate: nowDate,
-              senderImage: 0
-            })
-            .then(function() {
-              window.close();
-            })
-            .catch(function(error) {
-              console.log(error);
-            })
+            window.close();
           })
         }
       }
 
-
-      // 메시지 선택
-      function selectMessage() {
-        if(target.options[target.selectedIndex].value == "req_denied")  {
-          var isDenied = confirm("이 요청을 정말로 거부 하시겠습니까?");
-          if(isDenied) {
-            alert("피드백에 거부 이유를 설명해주세요")
-            document.getElementById("teacherFeedback").value = "Your request for correction has been rejected because it contains inappropriate contents";
-          }
-        }
+      function btnChecked() {
+        let selectedText = window.getSelection();
+        document.getElementById('teacherFeedback').value += selectedText + "\n";
       }
+
 
     </script>
   </body>
