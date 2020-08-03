@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>교정요청_상세</title>
+    <script src="/ckeditor/ckeditor.js"></script>
   </head>
   <body>
     <h1>교정요청_상세</h1>
@@ -14,13 +15,15 @@
     <input type="radio" name="responseType"> 재작성요청
 
     <h3>학생글</h3>
-    <textarea id="studentWriting" rows="8" cols="80" disabled></textarea>
+    <textarea id="studentWriting" rows="8" cols="80" disabled="disabled"></textarea>
 
     <h3>교정</h3>
     <textarea id="teacherCorrection" rows="8" cols="80"></textarea>
-    <input type="button" value="체크" onclick="btnChecked()">
+    <input type="button" value="이해불가" onclick="cantUnderstand()">
+    <input type="button" value="교정" onclick="corrected()">
 
-    <h3>피드백/문법설명 (재작성요청시 : 이해할 수 없는 부분 붙여넣기)</h3>
+
+    <h3>피드백/문법설명</h3>
     <textarea id="teacherFeedback" rows="8" cols="80"></textarea>
 
     <h3>학생피드백</h3>
@@ -34,6 +37,9 @@
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
     <script src="firebaseinit.js"></script>
     <script src="getExtra.js"></script>
+    <script>
+    CKEDITOR.replace( 'teacherCorrection' );
+    </script>
 
     <script>
 
@@ -45,7 +51,11 @@
         if(doc.exists) {
           document.getElementById('studentName').innerHTML = doc.data().userName;
           document.getElementById('studentWriting').value = doc.data().contents;
-          document.getElementById('teacherCorrection').value = doc.data().correction;
+          if(doc.data().correction == null) {
+            CKEDITOR.instances['teacherCorrection'].setData(doc.data().contents);
+          } else {
+            CKEDITOR.instances['teacherCorrection'].setData(doc.data().correction);
+          }
           document.getElementById('teacherFeedback').value = doc.data().teacherFeedback;
           document.getElementById('studentFeedback').value = doc.data().studentFeedback;
           userEmail = doc.data().userEmail;
@@ -65,6 +75,17 @@
         });
       }
 
+      function cantUnderstand() {
+        let selectedText = window.getSelection();
+        CKEDITOR.replace
+        document.getElementById('teacherFeedback').value += selectedText + "\n";
+
+      }
+
+      function corrected() {
+
+      }
+
 
       // 완료버튼 누름
       function btnCompleted() {
@@ -75,7 +96,8 @@
 
 
         if(isCompleted) {
-          var teacherCorrection = document.getElementById('teacherCorrection').value;
+          //var studentWriting = document.getElementById('studentWriting').value;
+          var correction = CKEDITOR.instances['teacherCorrection'].getData();
           var teacherFeedback = document.getElementById('teacherFeedback').value;
           var d = new Date();
           var nowDate = Math.floor(Date.now() / 1000);
@@ -95,7 +117,8 @@
 
           // 교정, 피드백 업데이트
           return writingRef.update({
-            correction: teacherCorrection,
+            //contents: studentWriting,
+            correction: correction,
             teacherFeedback: teacherFeedback,
             status: numberStatus,
             dateAnswer: nowDate
@@ -104,13 +127,6 @@
           })
         }
       }
-
-      function btnChecked() {
-        let selectedText = window.getSelection();
-        document.getElementById('teacherFeedback').value += selectedText + "\n";
-      }
-
-
     </script>
   </body>
 </html>

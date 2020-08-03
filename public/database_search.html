@@ -18,7 +18,7 @@
     <input type="button" value="내DB검색" onclick="clickSearchMyDB()">
     </br></br>
 
-    <h3>attention</h3>
+    <h3>attention (마지막 방문 : <span id="lastVisit"></span>)</h3>
     <input id="daysOfTheWeek" type="text" style='width:95%'>
 
     <h3>points</h3>
@@ -51,6 +51,7 @@
     <script>
       let referenceMyDB;
       let userEmail;
+      let lastVisit;
       let attendance;
       let points;
       let lessonComplete;
@@ -94,7 +95,9 @@
         let specialLessonUnlockArray = stringToArray(specialLessonUnlock);
         let readingUnlockArray = stringToArray(readingUnlock);
 
-        db.collection("android/podo/users/"+userEmail+"/information").doc("information").set({
+        var ref = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+
+        return ref.update({
           attendance : attendanceArray,
           points : parseInt(points),
           lessonComplete : lessonCompleteArray,
@@ -126,12 +129,15 @@
         referenceMyDB.get().then(function(doc) {
           if(doc.exists) {
             attendance = doc.data().attendance.toString();
+            lastVisit = doc.data().lastVisit.toString();
             points = doc.data().points;
             lessonComplete = doc.data().lessonComplete.toString();
             readingComplete = doc.data().readingComplete.toString();
             specialLessonUnlock = doc.data().specialLessonUnlock.toString();
             readingUnlock = doc.data().readingUnlock.toString();
             document.getElementById('daysOfTheWeek').value = attendance;
+            var dateLastVisit = new Date(doc.data().lastVisit * 1000);
+            document.getElementById('lastVisit').innerHTML = moment(dateLastVisit).format('YYYY-MM-DD HH:mm:ss');
             document.getElementById('points').value = points;
             document.getElementById('lessonComplete').value = lessonComplete;
             document.getElementById('readingComplete').value = readingComplete;
