@@ -63,18 +63,10 @@
         if(reply != "") {
           return ref.update({
             status: 2,
+            answer: reply
           })
           .then(function() {
-            // 완료 메시지 보내기
-            db.collection("android/podo/users").doc(userEmail).collection("messages").add({
-              isNew: true,
-              message: reply,
-              messageDate: nowDate,
-              senderImage: 0
-            })
-            .then(function() {
-              window.close();
-            })
+            window.close();
           })
         }
       }

@@ -17,15 +17,13 @@ admin.initializeApp({
 let messaging = admin.messaging();
 
 
-function createDB() {
+function createWritingDB() {
   console.log("DB 시작!");
   let db = admin.firestore();
 
   let podoDoc = db.collection('android').doc('podo');
   podoDoc.set({id: 'podo'});
-  let requestsDoc = podoDoc.collection('teachers').doc('requests');
-  requestsDoc.set({id: 'requests'});
-  let writingDoc = requestsDoc.collection('writings').doc('0000-0000-0000');
+  let writingDoc = podoDoc.collection('writings').doc('0000-0000-0000');
   writingDoc.set({
     contents: '안녕하세요',
     correction: '교정',
@@ -47,6 +45,27 @@ function createDB() {
   return 'success'
 }
 
+function createReportDB() {
+  console.log("DB 시작!");
+  let db = admin.firestore();
+
+  let podoDoc = db.collection('android').doc('podo');
+  podoDoc.set({id: 'podo'});
+  let reportDoc = podoDoc.collection('reports').doc('0000-0000-0000');
+  reportDoc.set({
+    comments: 'I suggest ...',
+    answer: 'podo answers ...blabla',
+    date: 1596685122,
+    status: 0,
+    userEmail: 'kammaii@naver.com',
+    userName: 'Danny Park',
+    userToken: 'eYLTFADIJSs:APA91bE2EqO4fdVUQGoz8ysTq9epL8SSMeKPmIiyjMRRrKGYVRg4AXInIx1wA_6sSIT33xst7gM7tvL4k_XS968WBjfeKLlIXZKZQxH3BpNNuC0TsmmMlG5lAAPzkX2UetxwKvneJnxQ'
+  });
+
+  return 'success'
+}
+
+
 
 function sendMessage(token, payload) {
   return messaging.sendToDevice(token, payload)
@@ -62,15 +81,19 @@ function sendMessage(token, payload) {
 
 function onCommentReply(change, context) {
   let status = change.after.data().status;
+  let studentEmail = change.after.data().userEmail;
+  let comments = change.after.data().comments;
+  let answer = change.after.data().answer;
   if(status === 2) {
     const payload = {
       data: {
       },
       notification: {
-        title: 'Your feedback has been answered',
-        body: 'check your message'
+        title: 'Find our response to your comment',
+        body: 'Please check your email !'
     }};
     sendMessage(change.after.data().userToken, payload);
+    sendEmailForComment(studentEmail, comments, answer);
   }
 
   return true;
@@ -129,15 +152,21 @@ function onWritingChange(change, context) {
 
   // 학생이 피드백 보내면 나한테 메일 보냄
   } else if(status === 3) {
-    sendEmail(studentEmail, contents, correction, teacherFeedback, studentFeedback);
+    sendEmailForWritingFeedback(studentEmail, contents, correction, teacherFeedback, studentFeedback);
   }
 
   return true;
 }
 
 
-exports.createDB = functions.https.onRequest((request, response) => {
-  let result = createDB()
+exports.createWritingDB = functions.https.onRequest((request, response) => {
+  let result = createWritingDB()
+  response.send(result);
+});
+
+
+exports.createReportDB = functions.https.onRequest((request, response) => {
+  let result = createReportDB()
   response.send(result);
 });
 
@@ -148,11 +177,11 @@ exports.onCommentReply = functions
 
 
 exports.onWritingChange = functions
-  .firestore.document('android/podo/teachers/requests/writings/{writingId}')
+  .firestore.document('android/podo/writings/{writingId}')
   .onWrite(onWritingChange);
 
 
-let sendEmail = function(studentEmail, contents, correction, teacherFeedback, studentFeedback) {
+let sendEmailForWritingFeedback = function(studentEmail, contents, correction, teacherFeedback, studentFeedback) {
   console.log("커렉션" + correction);
   console.log("학생피드백" + studentFeedback);
   // create reusable transporter object using the default SMTP transport
@@ -181,6 +210,38 @@ let sendEmail = function(studentEmail, contents, correction, teacherFeedback, st
   transporter.sendMail({
     from: "akorean.app@gmail.com", // sender address
     to: "akorean.app@gmail.com", // list of receivers
+    subject: mailSubject, // Subject line
+    //text: "Hello world?", // plain text body
+    html: mailContents // html body
+  });
+}
+
+
+let sendEmailForComment = function(studentEmail, comments, answer) {
+  console.log("학생이메일" + studentEmail);
+  console.log("코멘트" + comments);
+  console.log("답변" + answer);
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "akorean.app@gmail.com", // generated ethereal user
+      pass: "gabman84" // generated ethereal password
+    }
+  });
+
+  // send mail with defined transport object
+  let mailSubject = "[podo] Responses to your comment";
+  let mailContents =
+  "<b>'podo' hears from you!</b><br><br>"
+  + "Thank you for your valuable opinion.<br><br>"
+  + answer + "<br><br>"
+  + "Sincerely<br><br>"
+  + "<img src='https://firebasestorage.googleapis.com/v0/b/podo-705c6.appspot.com/o/logo.png?alt=media&token=9665bfa8-7c96-4a93-897d-848e11fe48d5' alt='podo' width='190' height='90'>";
+
+  transporter.sendMail({
+    from: "akorean.app@gmail.com", // sender address
+    to: studentEmail, // list of receivers
     subject: mailSubject, // Subject line
     //text: "Hello world?", // plain text body
     html: mailContents // html body

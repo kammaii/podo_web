@@ -44,7 +44,7 @@
     <script>
 
       var userEmail;
-      var writingRef = db.collection("android/podo/teachers/requests/writings").doc(getExtra);
+      var writingRef = db.collection("android/podo/writings").doc(getExtra);
 
 
       writingRef.get().then(function(doc) {
@@ -65,7 +65,7 @@
 
       function getRequestCount() {
         let requestCount = 0;
-        db.collection("android/podo/teachers/requests/writings").where("userEmail", "==", userEmail)
+        db.collection("android/podo/writings").where("userEmail", "==", userEmail)
         .get()
         .then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {
