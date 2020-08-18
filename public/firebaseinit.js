@@ -13,36 +13,50 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 //var storage = firebase.storage();
 
-// Initialize the FirebaseUI Widget using Firebase.
-var ui = new firebaseui.auth.AuthUI(firebase.auth());
+function uiInit() {
+  // Initialize the FirebaseUI Widget using Firebase.
+  var ui = new firebaseui.auth.AuthUI(firebase.auth());
 
-// The start method will wait until the DOM is loaded.
+  // The start method will wait until the DOM is loaded.
+  var uiConfig = {
+    callbacks: {
+      signInSuccessWithAuthResult: function(authResult, redirectUrl) {
 
-var uiConfig = {
-  callbacks: {
-    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+        firebase.auth().onAuthStateChanged(function(user) {
+          let inputId;
 
-      firebase.auth().onAuthStateChanged(function(user) {
-        let inputId;
+          switch (user.email.toString()) {
+            case 'akorean.app@gmail.com' :
+              inputId = 'danny';
+              break;
+          }
 
-        switch (user.email.toString()) {
-          case 'akorean.app@gmail.com' :
-            inputId = 'danny';
-            break;
-        }
+          location.href="/request.html?id="+inputId;
+        });
 
-        location.href="/request.html?id="+inputId;
-      });
+        return true;
+      }
+    },
+    // signInSuccessUrl: 'main.html',
+    // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+    signInOptions: [
+      // Leave the lines as is for the providers you want to offer your users.
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    ],
+  };
 
-      return true;
-    }
-  },
-  // signInSuccessUrl: 'main.html',
-  // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
-  signInOptions: [
-    // Leave the lines as is for the providers you want to offer your users.
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-  ],
-};
+  ui.start('#firebaseui-auth-container', uiConfig);
+}
 
-ui.start('#firebaseui-auth-container', uiConfig);
+
+function getNewRequestCount() {
+  let count = 0;
+  let reference = db.collection("android/podo/teachers/requests/writings").where("status", "==", 1);
+  reference.get().then(function(querySnapshot) {
+    querySnapshot.forEach(function(doc) {
+      count++;
+    })
+    document.getElementById("btnCorrection").value = '교정조회' + '(' + count + ')';
+    //$('#btnCorrection').html('교정조회' + '(' + count + ')')
+  })
+}

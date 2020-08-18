@@ -7,6 +7,9 @@
     <script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <title>교정조회</title>
     <style>
+      .email {
+        cursor:pointer;
+      }
       .menus, .listClass{
         display: flex;
         justify-content: space-around;
@@ -21,9 +24,9 @@
   <body>
     <h1>메뉴</h1>
     <input type="button" value="프로필설정" onclick="nevigation('profile')">
-    <input type="button" value="교정조회" onclick="nevigation('request')">
+    <input id="btnCorrection" type="button" value="교정조회" onclick="nevigation('request')">
     <input type="button" value="DB검색" onclick="nevigation('database_search')">
-    <input type="button" value="코멘트검색" onclick="nevigation('comment')">
+    <input id="btnComment" type="button" value="코멘트검색" onclick="nevigation('comment')">
     <input type="button" value="메시지보내기" onclick="nevigation('message')">
     <br/>
     <h1>교정조회</h1>
@@ -71,12 +74,17 @@
       var searchAll;
 
       var reference;
+      let myTable = null;
+
+      let data;
+
+      getNewRequestCount();
 
       function nevigation(html) {
         location.href="/" + html + ".html?id=" + getExtra;
       }
 
-
+/*
       // 학생이메일 검색
       function searchEmail() {
         reference = db.collection("android/podo/writings").where("teacherId", "==", getExtra);
@@ -87,10 +95,11 @@
           getItems();
         }
       }
+      */
 
       // 상태 검색
       function search() {
-        reference = db.collection("android/podo/writings").where("teacherId", "==", getExtra);
+        reference = db.collection("android/podo/teachers/requests/writings").where("teacherId", "==", getExtra);
         var status = document.getElementsByName('status');
         var statusId;
         console.log("상태검색");
@@ -98,9 +107,11 @@
         for(var i=0; i<3; i++) {
           if(status[i].checked) {
             if(i == 0) {
+              console.log("신규");
               reference = reference.where("status", "==", 1);
 
             } else if(i == 1) {
+              console.log("완료");
               reference = reference.where("status", ">", 1).where("status", "<", 4);
 
             } else if(i == 2) {
@@ -108,6 +119,7 @@
             }
           }
         }
+        destroyTable();
         getItems();
       }
 
@@ -118,18 +130,68 @@
         newWindow.location.href="/req_correction_detail.html?guid=" + guid;
       }
 
+/*
+      function getItems() {
+        data = [];
+        reference.get().then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            data.push(doc.data());
+          })
+        })
+        destroyTable();
+        createTable();
+      }
 
-      // 테이블 초기화하고 DB에서 아이템 가져오기
+
+      function createTable() {
+        if(myTable == null) {
+          myTable = $('#tg').DataTable(
+            {data: data,
+            columns: [
+              {data: ''},
+              {data: ''},
+              {data: 'guid'},
+              {data: 'contents'},
+              {data: 'studentEmail'},
+              {data: 'dataRequest'},
+              {data: 'dateAnswer'},
+              {data: 'status'},
+              {data: 'teacherId'}
+            ]
+          });
+        }
+      }
+
+*/
+      function destroyTable() {
+        if(myTable != null) {
+          myTable.destroy();
+        }
+        myTable = null;
+      }
+
+
+      // DB에서 아이템 가져오기
       function getItems() {
 
         if(no > 0) {
           for(let i=0; i<no; i++) {
             let item = document.getElementById('row' + i);
-            item.remove();
+            if(item != null) {
+              item.remove();
+            }
             console.log("row"+i+"을 지웁니다");
           }
           no = 0;
         }
+
+
+
+        function emailSearch(email) {
+          $('.dataTables_filter input').val(email);
+          myTable.columns(4).search(email).draw();
+        }
+
 
         reference.get().then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {
@@ -155,6 +217,11 @@
             guidNo.innerHTML = guid.substring(0,8)+"...";
             contents.innerHTML = data.contents.substring(0,30)+"...";
             studentEmail.innerHTML = data.userEmail;
+            console.log("이메일 : " + studentEmail);
+            studentEmail.className = "email";
+            // studentEmail.onClick(function(evt) {
+            //   console.log("클릭!");
+            // })
             var dateRequest = new Date(data.dateRequest * 1000);
             requestDate.innerHTML = moment(dateRequest).format('YYYY-MM-DD HH:mm:ss');
             if(data.dateAnswer != null) {
@@ -171,10 +238,19 @@
             teacherName.innerHTML = data.teacherName;
             no++;
           })
-          //요청날짜 순으로 정렬하기
-          $('#tg').DataTable();
+          if(myTable != null) {
+            myTable.destroy();
+          }
+          myTable = $('#tg').DataTable({
+            "order": [[5,"desc"]]
+          });
+          $('.email').click(function(evt) {
+            console.log("클릭!");
+            emailSearch(evt.target.innerHTML);
+          })
         })
       }
+
     </script>
   </body>
 </html>
