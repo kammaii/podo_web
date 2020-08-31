@@ -31,7 +31,7 @@ function uiInit() {
               break;
           }
 
-          location.href="/request.html?id="+inputId;
+          location.href="/correction.html?id="+inputId;
         });
 
         return true;
@@ -59,4 +59,46 @@ function getNewRequestCount() {
     document.getElementById("btnCorrection").value = '교정조회' + '(' + count + ')';
     //$('#btnCorrection').html('교정조회' + '(' + count + ')')
   })
+}
+
+
+
+function createNavBtn(btnValue, btnId, clickFn) {
+  var newInput = document.createElement("input");
+  newInput.type = "button";
+  newInput.value = btnValue;
+  newInput.id = btnId;
+  newInput.onclick = clickFn;
+  return newInput;
+}
+
+function createNav() {
+  var nav = document.getElementById('nav');
+  var btn1 = createNavBtn("프로필설정", "", navProfile);
+  var btn2 = createNavBtn("교정조회", "btnCorrection", navCorrection);
+  var btn3 = createNavBtn("코멘트조회", "btnComment", navComment);
+  var btn4 = createNavBtn("DB 검색", "", navDB);
+  var btn5 = createNavBtn("메시지보내기", "", navMessage);
+
+  nav.appendChild(btn1);
+  nav.appendChild(btn2);
+  nav.appendChild(btn3);
+  nav.appendChild(btn4);
+  nav.appendChild(btn5);
+}
+
+function navProfile() {
+  return location.href="/profile.html?id=" + getExtra;
+}
+function navCorrection() {
+  return location.href="/correction.html?id=" + getExtra;
+}
+function navComment() {
+  return location.href="/comment.html?id=" + getExtra;
+}
+function navDB() {
+  return location.href="/database_search.html?id=" + getExtra;
+}
+function navMessage() {
+  return location.href="/message.html?id=" + getExtra;
 }

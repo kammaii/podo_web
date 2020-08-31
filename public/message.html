@@ -6,11 +6,7 @@
   </head>
   <body>
     <h1>메뉴</h1>
-    <input type="button" value="프로필설정" onclick="nevigation('profile')">
-    <input type="button" value="교정조회" onclick="nevigation('request')">
-    <input type="button" value="DB검색" onclick="nevigation('database_search')">
-    <input type="button" value="코멘트검색" onclick="nevigation('comment')">
-    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+    <div id="nav"></div>
 
     <h1>메시지보내기</h1>
 
@@ -34,6 +30,8 @@
     <script src="firebaseinit.js"></script>
     <script src="getExtra.js"></script>
     <script>
+
+      createNav();
 
       // 메시지 선택
       function selectMessage() {

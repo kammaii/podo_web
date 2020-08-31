@@ -17,11 +17,7 @@
   </head>
   <body>
     <h1>메뉴</h1>
-    <input type="button" value="프로필설정" onclick="nevigation('profile')">
-    <input type="button" value="교정조회" onclick="nevigation('request')">
-    <input type="button" value="DB검색" onclick="nevigation('database_search')">
-    <input type="button" value="코멘트검색" onclick="nevigation('comment')">
-    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+    <div id="nav"></div>
     <br/>
     <h1>코멘트조회</h1>
     학생이메일 검색: <input id="searchEmail" value=""/>
@@ -63,6 +59,8 @@
       var searchAll;
 
       var reference;
+
+      createNav();
 
       function nevigation(html) {
         location.href="/" + html + ".html?id=" + getExtra;

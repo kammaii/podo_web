@@ -23,16 +23,17 @@
   </head>
   <body>
     <h1>메뉴</h1>
-    <input type="button" value="프로필설정" onclick="nevigation('profile')">
+    <div id="nav"></div>
+    <!-- <input type="button" value="프로필설정" onclick="nevigation('profile')">
     <input id="btnCorrection" type="button" value="교정조회" onclick="nevigation('request')">
     <input type="button" value="DB검색" onclick="nevigation('database_search')">
     <input id="btnComment" type="button" value="코멘트검색" onclick="nevigation('comment')">
-    <input type="button" value="메시지보내기" onclick="nevigation('message')">
+    <input type="button" value="메시지보내기" onclick="nevigation('message')"> -->
     <br/>
     <h1>교정조회</h1>
     학생이메일 검색: <input id="searchEmail" value=""/>
     <input type="button" value="이메일검색" onclick="searchEmail()">
-     <br>
+    <br>
     상태 검색:
     <input type="radio" name="status" checked="checked"> 신규
     <input type="radio" name="status"> 완료
@@ -78,11 +79,8 @@
 
       let data;
 
+      createNav();
       getNewRequestCount();
-
-      function nevigation(html) {
-        location.href="/" + html + ".html?id=" + getExtra;
-      }
 
 /*
       // 학생이메일 검색
@@ -127,7 +125,7 @@
       // 상세정보페이지에 guid 넘기기
       function nextPage(guid) {
         var newWindow = window.open("about:blank");
-        newWindow.location.href="/req_correction_detail.html?guid=" + guid;
+        newWindow.location.href="/correction_detail.html?guid=" + guid;
       }
 
 /*
