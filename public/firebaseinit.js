@@ -51,7 +51,7 @@ function uiInit() {
 
 function getNewRequestCount() {
   let count = 0;
-  let reference = db.collection("android/podo/teachers/requests/writings").where("status", "==", 1);
+  let reference = db.collection("android/podo/writings").where("status", "==", 1);
   reference.get().then(function(querySnapshot) {
     querySnapshot.forEach(function(doc) {
       count++;
@@ -77,14 +77,16 @@ function createNav() {
   var btn1 = createNavBtn("프로필설정", "", navProfile);
   var btn2 = createNavBtn("교정조회", "btnCorrection", navCorrection);
   var btn3 = createNavBtn("코멘트조회", "btnComment", navComment);
-  var btn4 = createNavBtn("DB 검색", "", navDB);
-  var btn5 = createNavBtn("메시지보내기", "", navMessage);
+  var btn4 = createNavBtn("질문조회", "btnQnA", navQnA);
+  var btn5 = createNavBtn("DB 검색", "", navDB);
+  var btn6 = createNavBtn("메시지보내기", "", navMessage);
 
   nav.appendChild(btn1);
   nav.appendChild(btn2);
   nav.appendChild(btn3);
   nav.appendChild(btn4);
   nav.appendChild(btn5);
+  nav.appendChild(btn6);
 }
 
 function navProfile() {
@@ -95,6 +97,9 @@ function navCorrection() {
 }
 function navComment() {
   return location.href="/comment.html?id=" + getExtra;
+}
+function navQnA() {
+  return location.href="/qna.html?id=" + getExtra;
 }
 function navDB() {
   return location.href="/database_search.html?id=" + getExtra;

@@ -79,6 +79,27 @@ function sendMessage(token, payload) {
 }
 
 
+function onQnAReply(change, context) {
+  let status = change.after.data().status;
+  let studentEmail = change.after.data().userEmail;
+  let question = change.after.data().question;
+  let answer = change.after.data().answer;
+  if(status === 2) {
+    const payload = {
+      data: {
+      },
+      notification: {
+        title: 'Your question has been answered.',
+        body: 'Please check Q&A menu.'
+    }};
+    sendMessage(change.after.data().userToken, payload);
+  }
+
+  return true;
+}
+
+
+
 function onCommentReply(change, context) {
   let status = change.after.data().status;
   let studentEmail = change.after.data().userEmail;
@@ -179,6 +200,12 @@ exports.onCommentReply = functions
 exports.onWritingChange = functions
   .firestore.document('android/podo/writings/{writingId}')
   .onWrite(onWritingChange);
+
+
+exports.onQnAReply = functions
+  .firestore.document('android/podo/qna/{qnaId}')
+  .onWrite(onQnAReply);
+
 
 
 let sendEmailForWritingFeedback = function(studentEmail, contents, correction, teacherFeedback, studentFeedback) {

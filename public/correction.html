@@ -97,7 +97,7 @@
 
       // 상태 검색
       function search() {
-        reference = db.collection("android/podo/teachers/requests/writings").where("teacherId", "==", getExtra);
+        reference = db.collection("android/podo/writings").where("teacherId", "==", getExtra);
         var status = document.getElementsByName('status');
         var statusId;
         console.log("상태검색");

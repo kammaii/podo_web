@@ -35,7 +35,7 @@
     </br></br>
 
     <input type="button" value="전체저장" onclick="save()">
-
+    <input type="button" value="메시지DB삭제" onclick="deleteMessageDB()">
 
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
@@ -60,7 +60,7 @@
       function giveBonusPoint() {
         let bonus = prompt('보너스 포인트를 입력하세요');
         if(userEmail != null) {
-          let pointRef = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+          let pointRef = db.collection("android/podo/users/").doc(userEmail);
           return db.runTransaction(function(transaction) {
             return transaction.get(pointRef).then(function(doc) {
               if(doc.exists) {
@@ -89,7 +89,7 @@
         let specialLessonUnlockArray = stringToArray(specialLessonUnlock);
         let readingUnlockArray = stringToArray(readingUnlock);
 
-        var ref = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+        var ref = db.collection("android/podo/users/").doc(userEmail);
 
         return ref.update({
           attendance : attendanceArray,
@@ -102,6 +102,45 @@
           console.log("DB 업데이트 성공");
         })
       }
+
+
+      function deleteMessageDB() {
+        var isCompleted = confirm("정말 삭제합니까?");
+
+        if(isCompleted) {
+          //var userInfoRef = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+          var docIdOnMessage = [];
+
+          // userInfoRef.delete().then(function() {
+          //   console.log("유저정보를 삭제합니다");
+          // });
+
+          db.collection("android/podo/users/"+userEmail+"/messages").get().then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              docIdOnMessage.push(doc.id);
+            })
+          })
+
+
+
+          // for (var i = 0; i < docIdOnMessage.length; i++) {
+          //   var messageRef = db.collection("android/podo/users/"+userEmail+"/messages").doc(docIdOnMessage[i]);
+          //   messageRef.delete().then(function() {
+          //     console.log("메시지를 삭제합니다" + i);
+          //   });
+          // }
+
+
+          // return db.runTransaction(function(transaction) {
+          //   return transaction.get(ref1).then(function(sfDoc) {
+          //     if(sfDoc.exists) {
+          //       console.log(sfDoc);
+          //     }
+          //   })
+          // })
+        }
+      }
+
 
       function stringToArray(string) {
         let array = string.split(',');
@@ -119,11 +158,11 @@
       }
 
       function searchDB() {
-        referenceMyDB = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
+        referenceMyDB = db.collection("android/podo/users/").doc(userEmail);
         referenceMyDB.get().then(function(doc) {
           if(doc.exists) {
             attendance = doc.data().attendance.toString();
-            lastVisit = doc.data().lastVisit.toString();
+            //lastVisit = doc.data().lastVisit.toString();
             points = doc.data().points;
             lessonComplete = doc.data().lessonComplete.toString();
             readingComplete = doc.data().readingComplete.toString();
@@ -149,143 +188,8 @@
       }
 
       function clickSearchMyDB() {
-        userEmail = 'gabmanpark@gmail.com';
+        userEmail = '0.0@gmail.com';
         searchDB();
-      }
-
-/*
-        request = document.getElementsByName('request');
-        searchAll = document.getElementById('searchAll');
-
-        // 교정요청, 녹음요청 선택
-        if(request[0].checked) {
-          console.log("교정요청");
-          reference = db.collection("android/podo/teachers/requests/writings").where("teacherId", "==", getExtra);
-        } else if(request[1].checked) {
-          console.log("녹음요청");
-          reference = db.collection("android/podo/teachers/requests/collections").where("teacherId", "==", getExtra);
-        }
-
-        // 전체 선택
-        if(searchAll.checked) {
-          if(request[0].checked) {
-            console.log("교정요청 + 전체체크");
-            reference = db.collection("android/podo/teachers/requests/writings");
-          } else if(request[1].checked) {
-            console.log("녹음요청 + 전체체크");
-            reference = db.collection("android/podo/teachers/requests/collections");
-          }
-        }
-
-        // 학생이메일 검색
-        var searchEmail = document.getElementById("searchEmail").value;
-        if(searchEmail != "") {
-          if(request[0].checked) {
-            console.log("교정요청 + 학생이메일");
-            reference = reference.where("userEmail", "==", searchEmail);
-          } else if(request[1].checked) {
-            console.log("녹음요청 + 학생이메일");
-            reference = reference.where("userEmail", "==", searchEmail);
-          }
-        }
-
-        // 상태 검색
-        var status = document.getElementsByName('status');
-        var statusId;
-        for(var i=0; i<3; i++) {
-          if(status[i].checked) {
-            if(i == 0) {
-              statusId = 1;
-            } else if(i == 1) {
-              statusId = 2;
-            } else if(i ==2) {
-              statusId = 3;
-            }
-            if(request[0].checked) {
-              console.log("교정요청+"+statusId);
-              reference = reference.where("status", "==", statusId);
-              console.log(reference);
-            } else if(request[1].checked) {
-              console.log("녹음요청+"+statusId);
-              reference = reference.where("status", "==", statusId);
-            }
-          }
-        }
-        getItems();
-      }
-
-*/
-
-      // 상세정보페이지에 guid 넘기기
-      function nextPage(guid) {
-        var newWindow = window.open("about:blank");
-        if(request[0].checked) {
-          newWindow.location.href="/req_correction_detail.html?guid=" + guid;
-        } else if(request[1].checked) {
-          newWindow.location.href="/req_record_detail.html?guid=" + guid;
-        }
-      }
-
-
-      // 테이블 초기화하고 DB에서 아이템 가져오기
-      function getItems() {
-
-        if(no > 0) {
-          for(let i=0; i<no; i++) {
-            let item = document.getElementById('row' + i);
-            item.remove();
-            console.log("row"+i+"을 지웁니다");
-          }
-          no = 0;
-        }
-
-        reference.get().then(function(querySnapshot) {
-          querySnapshot.forEach(function(doc) {
-            let data = doc.data();
-            tbody = document.getElementById('tg');
-            row = tbody.insertRow();
-            row.id = "row" + no;
-            console.log("row"+no+"이 생성되었습니다");
-
-            let selectItem = row.insertCell(0)
-            let requestNo = row.insertCell(1);
-            let guidNo = row.insertCell(2);
-            let contents = row.insertCell(3);
-            let studentEmail = row.insertCell(4);
-            let requestDate = row.insertCell(5);
-            let answerDate = row.insertCell(6);
-            let status = row.insertCell(7);
-            let teacherName = row.insertCell(8);
-            let guid = data.guid;
-
-            requestNo.innerHTML = no;
-            if(request[0].checked) {
-              selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + guid + "')\">";
-              guidNo.innerHTML = guid.substring(0,8)+"...";
-              contents.innerHTML = data.contents.substring(0,30)+"...";
-            } else if(request[1].checked) {
-              selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + doc.id + "')\">";
-              guidNo.innerHTML = doc.id.substring(0,8)+"...";
-              contents.innerHTML = data.front[0].substring(0,30)+"...";
-            }
-            studentEmail.innerHTML = data.userEmail;
-            var dateRequest = new Date(data.dateRequest * 1000);
-            requestDate.innerHTML = moment(dateRequest).format('YYYY-MM-DD HH:mm:ss');
-            if(data.dateAnswer != null) {
-              var dateAnswer = new Date(data.dateAnswer * 1000);
-              answerDate.innerHTML = moment(dateAnswer).format('YYYY-MM-DD HH:mm:ss');
-            }
-            if(data.status == 1) {
-              status.innerHTML = "신규";
-            }else if(data.status == 2) {
-              status.innerHTML = "완료";
-            }else if(data.status == 3) {
-              status.innerHTML = "거부";
-            }
-            teacherName.innerHTML = data.teacherName;
-            no++;
-          })
-        })
       }
     </script>
   </body>

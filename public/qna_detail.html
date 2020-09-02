@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>질문_상세</title>
+  </head>
+  <body>
+    <h1>질문_상세</h1>
+
+    <h3>학생이름: <span id="studentName"></span></h3>
+    <h3>질문횟수: <span id="questionCount"></span></h3>
+
+    <input type="radio" name="answerType" checked="checked"> 회신
+    <input type="radio" name="answerType"> 반송
+
+    <h3>질문</h3>
+    <textarea id="question" rows="8" cols="80" disabled="disabled"></textarea>
+
+    <h3>답변</h3>
+    <textarea id="answer" rows="8" cols="80"></textarea>
+
+    <hr>
+    <input type="button" value="완료" onclick="btnCompleted()">
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
+
+    <script>
+
+      var userEmail;
+      var qnaRef = db.collection("android/podo/qna").doc(getExtra);
+
+      qnaRef.get().then(function(doc) {
+        if(doc.exists) {
+          document.getElementById('studentName').innerHTML = doc.data().userName;
+          document.getElementById('question').value = doc.data().question;
+          document.getElementById('answer').value = doc.data().answer;
+          userEmail = doc.data().userEmail;
+          getQuestionCount();
+        }
+      })
+
+      function getQuestionCount() {
+        let questionCount = 0;
+        db.collection("android/podo/qna").where("userEmail", "==", userEmail)
+        .get()
+        .then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            questionCount++;
+            document.getElementById('questionCount').innerHTML = questionCount;
+          });
+        });
+      }
+
+      // 완료버튼 누름
+      function btnCompleted() {
+        var isCompleted = confirm("완료하시겠습니까?");
+        var sendMessage;
+        var status;
+        var answerType = document.getElementsByName('answerType');
+
+
+        if(isCompleted) {
+          var answer = document.getElementById('answer').value;
+          var d = new Date();
+          var nowDate = Math.floor(Date.now() / 1000);
+
+          for(var i=0; i<2; i++) {
+            if(answerType[i].checked) {
+              if(i == 0) {
+                status = 2;
+              } else if(i == 1) {
+                status = 99;
+              }
+            }
+          }
+
+          var numberStatus = parseInt(status);
+
+          return qnaRef.update({
+            answer: answer,
+            status: numberStatus,
+            dateAnswer: nowDate
+          }).then(function() {
+            window.close();
+          })
+        }
+      }
+    </script>
+  </body>
+</html>

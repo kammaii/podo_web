@@ -31,7 +31,7 @@
     createNav();
 
       // DB에서 상태, 태그 가져오기
-      var teachersRef = db.collection("android/podo/teachers/information/information").doc(getExtra);
+      var teachersRef = db.collection("android/podo/teachers").doc(getExtra);
       teachersRef.get().then(function(doc) {
         if(doc.exists) {
           let oldStatus = doc.data().status;
