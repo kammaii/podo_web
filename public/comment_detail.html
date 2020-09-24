@@ -36,6 +36,7 @@
         if(doc.exists) {
           document.getElementById('studentName').innerHTML = doc.data().userName;
           document.getElementById('comment').value = doc.data().comments;
+          document.getElementById('reply').value = doc.data().answer;
           userEmail = doc.data().userEmail;
           userToken = doc.data().userToken;
           getcommentCount();

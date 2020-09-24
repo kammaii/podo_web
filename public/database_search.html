@@ -117,7 +117,10 @@
 
           db.collection("android/podo/users/"+userEmail+"/messages").get().then(function(querySnapshot) {
             querySnapshot.forEach(function(doc) {
-              docIdOnMessage.push(doc.id);
+              doc.ref.delete().then(function(){
+                console.log("Removed : " + doc.id);
+              })
+              //docIdOnMessage.push(doc.id);
             })
           })
 

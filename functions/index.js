@@ -180,6 +180,19 @@ function onWritingChange(change, context) {
 }
 
 
+function sendAlarm() {
+  // step0 : 
+  // step1 : get time from the database
+
+  console.log("알람!");
+}
+
+exports.scheduledFunction = functions.pubsub.schedule('every 5 minutes').onRun((context) => {
+  sendAlarm();
+  return null;
+});
+
+
 exports.createWritingDB = functions.https.onRequest((request, response) => {
   let result = createWritingDB()
   response.send(result);
