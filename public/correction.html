@@ -38,7 +38,10 @@
     <input type="radio" name="status" checked="checked"> 신규
     <input type="radio" name="status"> 완료
     <input type="radio" name="status"> 재작성요청
+
     <input type="button" value="상태검색" onclick="search()">
+    <input type="button" value="구DB검색" onclick="searchOld()">
+
     <br><br>
     <div class="tg-wrap">
       <table id="tg">
@@ -96,10 +99,17 @@
       */
 
       // 상태 검색
+      function searchOld() {
+        reference = db.collection("android/podo/teachers/requests/writings").where("teacherId", "==", getExtra).where("status", "==", 1);
+        destroyTable();
+        getItems();
+      }
+
+
+      // 상태 검색
       function search() {
         reference = db.collection("android/podo/writings").where("teacherId", "==", getExtra);
         var status = document.getElementsByName('status');
-        var statusId;
         console.log("상태검색");
 
         for(var i=0; i<3; i++) {

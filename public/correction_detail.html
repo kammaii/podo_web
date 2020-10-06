@@ -19,8 +19,7 @@
 
     <h3>교정</h3>
     <textarea id="teacherCorrection" rows="8" cols="80"></textarea>
-    <input type="button" value="이해불가" onclick="cantUnderstand()">
-    <input type="button" value="교정" onclick="corrected()">
+    <input type="button" value="빨간색" onclick="checkRed()">
 
 
     <h3>피드백/문법설명</h3>
@@ -74,14 +73,7 @@
         });
       }
 
-      function cantUnderstand() {
-        let selectedText = window.getSelection();
-        CKEDITOR.replace
-        document.getElementById('teacherFeedback').value += selectedText + "\n";
-
-      }
-
-      function corrected() {
+      function checkRed() {
 
       }
 
