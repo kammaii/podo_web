@@ -80,6 +80,8 @@ function createNav() {
   var btn4 = createNavBtn("질문조회", "btnQnA", navQnA);
   var btn5 = createNavBtn("DB 검색", "", navDB);
   var btn6 = createNavBtn("메시지보내기", "", navMessage);
+  var btn7 = createNavBtn("테스트DB만들기", "", testDB);
+  var btn8 = createNavBtn("구)교정 옮기기", "", moveCorrection);
 
   nav.appendChild(btn1);
   nav.appendChild(btn2);
@@ -87,6 +89,10 @@ function createNav() {
   nav.appendChild(btn4);
   nav.appendChild(btn5);
   nav.appendChild(btn6);
+  //nav.appendChild(btn7);
+  // nav.appendChild(btn8);
+
+
 }
 
 function navProfile() {
@@ -106,4 +112,34 @@ function navDB() {
 }
 function navMessage() {
   return location.href="/message.html?id=" + getExtra;
+}
+
+function testDB() {
+  db.collection("android/podo/users/0.00@gmail.com/information").doc("information").set({
+    lessonComplete: ["L_00%100", "L_01%100"],
+    readingComplete: ["R_00%100", "R_01%100"],
+  })
+  .then(function() {
+    console.log("테스트DB를 만들었습니다");
+  });
+}
+
+
+function moveCorrection() {
+  db.collection("android/podo/teachers/requests/writings")
+  .get()
+  .then(function(querySnapshot) {
+    querySnapshot.forEach(function(doc) {
+        moveToNewDB(doc.id, doc.data());
+    });
+  })
+}
+
+
+
+function moveToNewDB(id, data) {
+  db.collection("android/podo/writings").doc(id).set(data);
+  db.collection("android/podo/teachers/requests/writings").doc(id).delete().then(function() {
+    console.log("삭제완료");
+  })
 }
