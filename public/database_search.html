@@ -18,7 +18,7 @@
     <input id="daysOfTheWeek" type="text" style='width:95%'>
 
     <h3>points</h3>
-    <input id="points" type="text" style='width:95%'>
+    <input id="points" type="text" style='width:20%'>
     <input type="button" value="보너스포인트주기" onclick="giveBonusPoint()">
 
     <h3>lesson complete</h3>
@@ -26,6 +26,9 @@
 
     <h3>reading complete</h3>
     <input id="readingComplete" type="text" style='width:95%'>
+
+    <h3>lesson unlock</h3>
+    <input id="lessonUnlock" type="text" style='width:95%'>
 
     <h3>special lesson unlock</h3>
     <input id="specialLessonUnlock" type="text" style='width:95%'>
@@ -52,6 +55,7 @@
       let points;
       let lessonComplete;
       let readingComplete;
+      let lessonUnlock;
       let specialLessonUnlock;
       let readingUnlock;
 
@@ -80,12 +84,14 @@
         points = document.getElementById('points').value;
         lessonComplete = document.getElementById('lessonComplete').value;
         readingComplete = document.getElementById('readingComplete').value;
+        lessonUnlock = document.getElementById('lessonUnlock').value;
         specialLessonUnlock = document.getElementById('specialLessonUnlock').value;
         readingUnlock = document.getElementById('readingUnlock').value;
 
         let attendanceArray = stringToArray(attendance);
         let lessonCompleteArray = stringToArray(lessonComplete);
         let readingCompleteArray = stringToArray(readingComplete);
+        let lessonUnlockArray = stringToArray(lessonUnlock);
         let specialLessonUnlockArray = stringToArray(specialLessonUnlock);
         let readingUnlockArray = stringToArray(readingUnlock);
 
@@ -96,6 +102,7 @@
           points : parseInt(points),
           lessonComplete : lessonCompleteArray,
           readingComplete : readingCompleteArray,
+          lessonUnlock : lessonUnlockArray,
           specialLessonUnlock : specialLessonUnlockArray,
           readingUnlock : readingUnlockArray
         }).then(function() {
@@ -165,10 +172,10 @@
         referenceMyDB.get().then(function(doc) {
           if(doc.exists) {
             attendance = doc.data().attendance.toString();
-            //lastVisit = doc.data().lastVisit.toString();
             points = doc.data().points;
             lessonComplete = doc.data().lessonComplete.toString();
             readingComplete = doc.data().readingComplete.toString();
+            lessonUnlock = doc.data().lessonUnlock.toString();
             specialLessonUnlock = doc.data().specialLessonUnlock.toString();
             readingUnlock = doc.data().readingUnlock.toString();
             document.getElementById('daysOfTheWeek').value = attendance;
@@ -177,6 +184,7 @@
             document.getElementById('points').value = points;
             document.getElementById('lessonComplete').value = lessonComplete;
             document.getElementById('readingComplete').value = readingComplete;
+            document.getElementById('lessonUnlock').value = lessonUnlock;
             document.getElementById('specialLessonUnlock').value = specialLessonUnlock;
             document.getElementById('readingUnlock').value = readingUnlock;
           } else {
