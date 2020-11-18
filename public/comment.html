@@ -2,8 +2,15 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <title>코멘트조회</title>
     <style>
+      .email {
+        cursor:pointer;
+      }
+
       .menus, .listClass{
         display: flex;
         justify-content: space-around;
@@ -31,15 +38,18 @@
     <br><br>
     <div class="tg-wrap">
       <table id="tg">
-        <tr>
-          <th>상세보기</th>
-          <th>번호</th>
-          <th>GUID</th>
-          <th>날짜</th>
-          <th>학생이메일</th>
-          <th>내용</th>
-          <th>상태</th>
-        </tr>
+        <thead>
+          <tr>
+            <th>상세보기</th>
+            <th>번호</th>
+            <th>GUID</th>
+            <th>날짜</th>
+            <th>학생이메일</th>
+            <th>내용</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="tgbody"></tbody>
       </table>
     </div>
 
@@ -58,7 +68,7 @@
       var request;
       var searchAll;
 
-      var reference;
+      let myTable = null;
 
       createNav();
 
@@ -67,19 +77,36 @@
       }
 
 
+      function destroyTable() {
+        if(myTable != null) {
+          myTable.destroy();
+        }
+        myTable = null;
+      }
+
+
+
       // 학생이메일 검색
       function searchEmail() {
         var searchEmail = document.getElementById("searchEmail").value.trim();
-        reference = db.collection("android/podo/reports").where("userEmail", "==", searchEmail);
+        let reference = db.collection("android/podo/reports").where("userEmail", "==", searchEmail);
         if(searchEmail != "") {
           console.log("학생이메일검색");
-          getItems();
+          destroyTable();
+          getItems(reference);
         }
+      }
+
+      function emailClicked(email) {
+        console.log(email);
+        let reference = db.collection("android/podo/reports").where("userEmail", "==", email);
+        destroyTable();
+        getItems(reference);
       }
 
       // 상태 검색
       function search() {
-        reference = db.collection("android/podo/reports");
+        let reference = db.collection("android/podo/reports");
         var status = document.getElementsByName('status');
         var statusId;
         for(var i=0; i<3; i++) {
@@ -95,7 +122,8 @@
             reference = reference.where("status", "==", statusId);
           }
         }
-        getItems();
+        destroyTable();
+        getItems(reference);
       }
 
 
@@ -107,7 +135,7 @@
 
 
       // 테이블 초기화하고 DB에서 아이템 가져오기
-      function getItems() {
+      function getItems(reference) {
         if(no > 0) {
           for(let i=0; i<no; i++) {
             let item = document.getElementById('row' + i);
@@ -120,7 +148,7 @@
         reference.get().then(function(querySnapshot) {
           querySnapshot.forEach(function(doc) {
             let data = doc.data();
-            tbody = document.getElementById('tg');
+            tbody = document.getElementById('tgbody');
             row = tbody.insertRow();
             row.id = "row" + no;
             console.log("row"+no+"이 생성되었습니다");
@@ -139,7 +167,7 @@
             guidNo.innerHTML = guid.substring(0,8)+"...";
             var dateComment = new Date(data.date * 1000);
             date.innerHTML = moment(dateComment).format('YYYY-MM-DD HH:mm:ss');
-            studentEmail.innerHTML = data.userEmail;
+            studentEmail.innerHTML = "<span class='email'>" + data.userEmail + "</span>";
             contents.innerHTML = data.comments.substring(0,30)+"...";
             if(data.status == 0) {
               status.innerHTML = "신규";
@@ -151,6 +179,17 @@
             no++;
           })
           //요청날짜 순으로 정렬하기
+          if(myTable != null) {
+            myTable.destroy();
+          }
+          myTable = $('#tg').DataTable({
+            "order": [[3,"desc"]]
+          });
+
+          $('.email').click(function(evt) {
+            console.log("클릭!");
+            emailClicked(evt.target.innerHTML);
+          })
 
         })
       }

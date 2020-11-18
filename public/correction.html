@@ -195,6 +195,13 @@
       }
 
 
+      function copyToClipboard(email) {
+        console.log(email);
+        navigator.clipboard.writeText(email);
+        return false;
+      }
+
+
 
       // DB에서 아이템 가져오기
       function getItems(reference) {
@@ -235,9 +242,10 @@
             selectItem.innerHTML = "<input type='button' onclick=\"nextPage('" + guid + "')\">";
             guidNo.innerHTML = guid.substring(0,8)+"...";
             contents.innerHTML = data.contents.substring(0,30)+"...";
-            studentEmail.innerHTML = data.userEmail;
+            studentEmail.innerHTML = "<span class='email'>"+data.userEmail+"</span>";
+            studentEmail.innerHTML += "<button onclick=\"copyToClipboard('"+ data.userEmail + "')\">copy</button>";
             console.log("이메일 : " + studentEmail);
-            studentEmail.className = "email";
+            // studentEmail.className = "email";
             // studentEmail.onClick(function(evt) {
             //   console.log("클릭!");
             // })
