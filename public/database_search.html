@@ -11,7 +11,9 @@
     <h1>DB조회</h1>
     학생이메일 : <input id="inputEmail" value=""/>
     <input type="button" value="검색" onclick="clickSearchUserDB()">
+    <input type="button" value="0.0@검색" onclick="clickSearch00()">
     <input type="button" value="내DB검색" onclick="clickSearchMyDB()">
+
     </br></br>
 
     <h3>attention (마지막 방문 : <span id="lastVisit"></span>)</h3>
@@ -199,9 +201,15 @@
       }
 
       function clickSearchMyDB() {
+        userEmail = 'gabmanpark@gmail.com';
+        searchDB();
+      }
+
+      function clickSearch00() {
         userEmail = '0.0@gmail.com';
         searchDB();
       }
+
     </script>
   </body>
 </html>
