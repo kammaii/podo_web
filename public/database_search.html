@@ -23,6 +23,18 @@
     <input id="points" type="text" style='width:20%'>
     <input type="button" value="보너스포인트주기" onclick="giveBonusPoint()">
 
+    <h3>챌린저 상태 (0:챌린저아님, 1:챌린지중, 2:챌린지끝)</h3>
+    <input id="isChallenger" type="text" style='width:95%'>
+
+    <h3>챌린지 보상 (0:안받음, 1:성공, 2:실패)</h3>
+    <input id="isChallengeRewarded" type="text" style='width:95%'>
+
+    <h3>챌린지 시작일 (<span id="challStart"></span>)</h3>
+    <input id="dateChallengeStart" type="text" style='width:95%'>
+
+    <h3>챌린지 종료일 (<span id="challExpire"></span>)</h3>
+    <input id="dateChallengeExpire" type="text" style='width:95%'>
+
     <h3>lesson complete</h3>
     <input id="lessonComplete" type="text" style='width:95%'>
 
@@ -55,6 +67,10 @@
       let lastVisit;
       let attendance;
       let points;
+      let isChallenger;
+      let isChallengeRewarded;
+      let dateChallengeStart;
+      let dateChallengeExpire;
       let lessonComplete;
       let readingComplete;
       let lessonUnlock;
@@ -84,6 +100,10 @@
       function save() {
         attendance = document.getElementById('daysOfTheWeek').value;
         points = document.getElementById('points').value;
+        isChallenger = document.getElementById('isChallenger').value;
+        isChallengeRewarded = document.getElementById('isChallengeRewarded').value;
+        dateChallengeStart = document.getElementById('dateChallengeStart').value;
+        dateChallengeExpire = document.getElementById('dateChallengeExpire').value;
         lessonComplete = document.getElementById('lessonComplete').value;
         readingComplete = document.getElementById('readingComplete').value;
         lessonUnlock = document.getElementById('lessonUnlock').value;
@@ -102,6 +122,10 @@
         return ref.update({
           attendance : attendanceArray,
           points : parseInt(points),
+          isChallenger : parseInt(isChallenger),
+          isChallengeRewarded : parseInt(isChallengeRewarded),
+          dateChallengeStart : parseInt(dateChallengeStart),
+          dateChallengeExpire : parseInt(dateChallengeExpire),
           lessonComplete : lessonCompleteArray,
           readingComplete : readingCompleteArray,
           lessonUnlock : lessonUnlockArray,
@@ -175,6 +199,10 @@
           if(doc.exists) {
             attendance = doc.data().attendance.toString();
             points = doc.data().points;
+            isChallenger = doc.data().isChallenger;
+            isChallengeRewarded = doc.data().isChallengeRewarded;
+            dateChallengeStart = doc.data().dateChallengeStart;
+            dateChallengeExpire = doc.data().dateChallengeExpire;
             lessonComplete = doc.data().lessonComplete.toString();
             readingComplete = doc.data().readingComplete.toString();
             lessonUnlock = doc.data().lessonUnlock.toString();
@@ -182,8 +210,16 @@
             readingUnlock = doc.data().readingUnlock.toString();
             document.getElementById('daysOfTheWeek').value = attendance;
             var dateLastVisit = new Date(doc.data().lastVisit * 1000);
+            var challStart = new Date(doc.data().dateChallengeStart * 1000);
+            var challExpire = new Date(doc.data().dateChallengeExpire * 1000);
             document.getElementById('lastVisit').innerHTML = moment(dateLastVisit).format('YYYY-MM-DD HH:mm:ss');
+            document.getElementById('challStart').innerHTML = moment(challStart).format('YYYY-MM-DD HH:mm:ss');
+            document.getElementById('challExpire').innerHTML = moment(challExpire).format('YYYY-MM-DD HH:mm:ss');
             document.getElementById('points').value = points;
+            document.getElementById('isChallenger').value = isChallenger;
+            document.getElementById('isChallengeRewarded').value = isChallengeRewarded;
+            document.getElementById('dateChallengeStart').value = dateChallengeStart;
+            document.getElementById('dateChallengeExpire').value = dateChallengeExpire;
             document.getElementById('lessonComplete').value = lessonComplete;
             document.getElementById('readingComplete').value = readingComplete;
             document.getElementById('lessonUnlock').value = lessonUnlock;

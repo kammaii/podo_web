@@ -25,9 +25,6 @@
     <h3>피드백/문법설명</h3>
     <textarea id="teacherFeedback" rows="8" cols="80"></textarea>
 
-    <h3>학생피드백</h3>
-    <textarea id="studentFeedback" rows="8" cols="80" disabled></textarea>
-
     <hr>
     <input type="button" value="완료" onclick="btnCompleted()">
 
@@ -55,7 +52,6 @@
             CKEDITOR.instances['teacherCorrection'].setData(doc.data().correction);
           }
           document.getElementById('teacherFeedback').value = doc.data().teacherFeedback;
-          document.getElementById('studentFeedback').value = doc.data().studentFeedback;
           userEmail = doc.data().userEmail;
           getRequestCount();
         }
@@ -74,7 +70,10 @@
       }
 
       function checkRed() {
-
+        var editor = CKEDITOR.instances['teacherCorrection'];
+        // var style = new CKEDITOR.style({element:'span',attributes:{'class':'red'}});
+        var style = new CKEDITOR.style({styles:{color:'red'}});
+        editor.applyStyle(style);
       }
 
 
