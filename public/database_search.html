@@ -12,11 +12,13 @@
     학생이메일 : <input id="inputEmail" value=""/>
     <input type="button" value="검색" onclick="clickSearchUserDB()">
     <input type="button" value="0.0@검색" onclick="clickSearch00()">
-    <input type="button" value="내DB검색" onclick="clickSearchMyDB()">
+    <input type="button" value="gabmanpark@검색" onclick="clickSearchMyDB()">
 
     </br></br>
 
-    <h3>attention (마지막 방문 : <span id="lastVisit"></span>)</h3>
+    <h3>가입일 : <span id="dateSignUp"></span></h3>
+    <h3>마지막 방문 : <span id="lastVisit"></span></h3>
+    <h3>attention</h3>
     <input id="daysOfTheWeek" type="text" style='width:95%'>
 
     <h3>points</h3>
@@ -64,7 +66,6 @@
     <script>
       let referenceMyDB;
       let userEmail;
-      let lastVisit;
       let attendance;
       let points;
       let isChallenger;
@@ -209,9 +210,11 @@
             specialLessonUnlock = doc.data().specialLessonUnlock.toString();
             readingUnlock = doc.data().readingUnlock.toString();
             document.getElementById('daysOfTheWeek').value = attendance;
+            var dateSignUp = new Date(doc.data().dateSignUp * 1000);
             var dateLastVisit = new Date(doc.data().lastVisit * 1000);
             var challStart = new Date(doc.data().dateChallengeStart * 1000);
             var challExpire = new Date(doc.data().dateChallengeExpire * 1000);
+            document.getElementById('dateSignUp').innerHTML = moment(dateSignUp).format('YYYY-MM-DD HH:mm:ss');
             document.getElementById('lastVisit').innerHTML = moment(dateLastVisit).format('YYYY-MM-DD HH:mm:ss');
             document.getElementById('challStart').innerHTML = moment(challStart).format('YYYY-MM-DD HH:mm:ss');
             document.getElementById('challExpire').innerHTML = moment(challExpire).format('YYYY-MM-DD HH:mm:ss');

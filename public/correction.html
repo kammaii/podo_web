@@ -93,6 +93,7 @@
         if(searchEmail != "") {
           console.log("학생이메일검색");
           reference = reference.where("userEmail", "==", searchEmail);
+          destroyTable();
           getItems(reference);
         }
       }
