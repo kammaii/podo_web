@@ -55,6 +55,8 @@
 
     <input type="button" value="전체저장" onclick="save()">
     <input type="button" value="메시지DB삭제" onclick="deleteMessageDB()">
+    <input type="button" value="DB삭제" onclick="deleteDB()">
+
 
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
@@ -138,8 +140,22 @@
       }
 
 
+      function deleteDB() {
+        var isCompleted = confirm("DB를 정말 삭제합니까?");
+
+        if(isCompleted) {
+
+          db.collection("android/podo/users/").doc(userEmail).delete().then(function() {
+            console.log("DB를 삭제했습니다.");
+          }).catch(function(error) {
+            console.log("DB 삭제를 실패했습니다.");
+          })
+        }
+      }
+
+
       function deleteMessageDB() {
-        var isCompleted = confirm("정말 삭제합니까?");
+        var isCompleted = confirm("메시지를 정말 삭제합니까?");
 
         if(isCompleted) {
           //var userInfoRef = db.collection("android/podo/users/"+userEmail+"/information").doc("information");
