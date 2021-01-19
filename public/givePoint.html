@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>포인트주기</title>
+  </head>
+  <body>
+    <h1>메뉴</h1>
+    <div id="nav"></div>
+
+    <h2>이메일입력</h2>
+    <input id="inputEmail" type="text" style='width:95%'>
+
+    <input type="button" value="이메일체크" onclick="checkEmail()">
+
+    <h2>포인트입력</h2>
+    <input id="inputPoint" type="text" value="">
+    <input type="button" value="주기" onclick="givePoint()">
+
+
+    <div id="result"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.0/firebase-firestore.js"></script>
+    <script src="firebaseinit.js"></script>
+    <script src="getExtra.js"></script>
+
+    <script>
+
+      createNav();
+
+      let filteredEmail = [];
+      let backUpData = [];
+
+      function checkEmail() {
+        let inputUser = document.getElementById('inputEmail').value;
+        let users = inputUser.split(' ');
+        let duplicatedEmail = [];
+
+        for(let i=0; i<users.length; i++) {
+          if(filteredEmail.indexOf(users[i]) === -1) {
+            filteredEmail.push(users[i]);
+
+          } else {
+            duplicatedEmail.push(users[i]);
+          }
+        }
+        let result = document.getElementById('result');
+        result.innerHTML = "<br><br>중복이메일 : " + duplicatedEmail +"<br>이메일개수 : " + filteredEmail.length;
+        console.log(filteredEmail);
+      }
+
+
+    function givePoint() {
+      if(filteredEmail.length <= 0) {
+        alert("이메일을 먼저 체크해주세요");
+      } else {
+        let isConfirm = confirm("포인트를 주겠습니까?");
+
+        if(isConfirm){
+          let inputPoint = parseInt(document.getElementById('inputPoint').value);
+
+          for(let i=0; i<filteredEmail.length; i++) {
+            let getUser = db.collection("android/podo/users/").doc(filteredEmail[i]);
+            db.runTransaction(function(transaction) {
+              return transaction.get(getUser).then(function(doc) {
+                if(doc.exists) {
+                  let thisPoint = parseInt(doc.data().points);
+                  let newPoint = thisPoint + inputPoint;
+                  backUpData[i] = filteredEmail[i] + "," + thisPoint + "," + newPoint + ",succeeded";
+                  transaction.update(getUser, {points : newPoint});
+
+                } else {
+                  backUpData[i] = filteredEmail[i] + ",failed";
+                }
+              });
+            }).then(function() {
+              console.log("보너스 포인트를 보냈습니다.");
+            }).catch(function(e) {
+              console.log("에러가 발생했습니다 : " + e);
+            });
+          }
+          console.log(backUpData);
+          //saveDB();
+        }
+      }
+    }
+
+    function saveDB() {
+
+      let docData = {
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        data: backUpData
+      };
+
+      db.collection("android/podo/backup/").add(docData).then(function() {
+        console.log("완료");
+      });
+    }
+
+    </script>
+  </body>
+</html>

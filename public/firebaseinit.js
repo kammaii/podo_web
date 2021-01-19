@@ -62,6 +62,18 @@ function getNewRequestCount() {
 }
 
 
+function getNewCommentCount() {
+  let count = 0;
+  let reference = db.collection("android/podo/reports").where("status", "==", 0);
+  reference.get().then(function(querySnapshot) {
+    querySnapshot.forEach(function(doc) {
+      count++;
+    })
+    document.getElementById("btnComment").value = '코멘트조회' + '(' + count + ')';
+    //$('#btnCorrection').html('교정조회' + '(' + count + ')')
+  })
+}
+
 
 function createNavBtn(btnValue, btnId, clickFn) {
   var newInput = document.createElement("input");
@@ -71,6 +83,7 @@ function createNavBtn(btnValue, btnId, clickFn) {
   newInput.onclick = clickFn;
   return newInput;
 }
+
 
 function createNav() {
   var nav = document.getElementById('nav');
@@ -82,18 +95,20 @@ function createNav() {
   var btn6 = createNavBtn("메시지보내기", "", navMessage);
   var btn7 = createNavBtn("테스트DB만들기", "", testDB);
   var btn8 = createNavBtn("구)교정 옮기기", "", moveCorrection);
+  var btn9 = createNavBtn("포인트주기", "", navGivePoint);
+
 
   nav.appendChild(btn1);
   nav.appendChild(btn2);
   nav.appendChild(btn3);
-  nav.appendChild(btn4);
+  // nav.appendChild(btn4);
   nav.appendChild(btn5);
-  nav.appendChild(btn6);
+  // nav.appendChild(btn6);
   //nav.appendChild(btn7);
   // nav.appendChild(btn8);
-
-
+  nav.appendChild(btn9);
 }
+
 
 function navProfile() {
   return location.href="/profile.html?id=" + getExtra;
@@ -112,6 +127,9 @@ function navDB() {
 }
 function navMessage() {
   return location.href="/message.html?id=" + getExtra;
+}
+function navGivePoint() {
+  return location.href="/givePoint.html?id=" + getExtra;
 }
 
 function testDB() {
